@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Api;
-
+use Stevebauman\Location\Facades\Location;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
