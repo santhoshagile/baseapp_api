@@ -15,10 +15,45 @@ class User extends Authenticatable
         'email',
         'password',
         'token_id',
+        'role_id',
     ];
 
     protected $hidden = [
         'password',
         'remember_token',
     ];
+
+    protected $appends = ['rolename', 'full_name'];
+
+    public function getFullNameAttribute()
+    {
+ 
+        if ($this->name) {
+            return $this->name . " " . $this->lastname;
+        } else {
+            return '';
+        }
+    }
+ 
+    public function getRoleNameAttribute()
+    {
+        $roledata = Role::where('id', $this->role_id)->first();
+        if ($roledata) {
+            return $roledata->rolename;
+        } else {
+            return '';
+        }
+    }
+   
+    public function getSlugOptions(): SlugOptions
+    {
+        return SlugOptions::create()
+            ->generateSlugsFrom('name')
+            ->saveSlugsTo('slug');
+    }
+
+    public function role()
+    {
+        return $this->belongsTo('App\Models\Role', 'role_id', 'id');
+    }
 }
