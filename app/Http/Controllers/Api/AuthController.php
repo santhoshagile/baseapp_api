@@ -28,7 +28,7 @@ class AuthController extends Controller
         $access_token = $user->createToken('API Token')->accessToken;
 
         return response()->json([
-            'status' => true,
+            'status' => 'S',
             'token' => $access_token,
             'user' => $user,
         ]);
@@ -38,7 +38,7 @@ class AuthController extends Controller
     {
         if (!Auth::attempt($request->only('email', 'password'))) {
             return response()->json([
-                'status' => false,
+                'status' => 'S',
                 'message' => 'Invalid credentials'
             ], 401);
         }
@@ -59,7 +59,7 @@ class AuthController extends Controller
         $userdata->save();
 
         return response()->json([
-            'status' => true,
+            'status' => 'S',
             'token' => $access_token,
             'user' => $userdata,
         ]);
@@ -75,7 +75,7 @@ class AuthController extends Controller
         $request->user()->token()->revoke();
 
         return response()->json([
-            'status' => true,
+            'status' => 'S',
             'message' => 'Logged out successfully'
         ]);
     }
