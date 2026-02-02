@@ -45,7 +45,18 @@ class AuthController extends Controller
 
         $userdata = Auth::user();
 
-        $access_token = $userdata->createToken('API Token')->accessToken;
+        // ✅ Revoke old tokens (good security practice)
+        $userdata->tokens()->delete();
+
+        // ✅ Create new token
+        $tokenResult = $userdata->createToken('API Token');
+
+        $access_token = $tokenResult->accessToken;
+        $tokenId     = $tokenResult->token->id;
+
+        // ✅ Save only small token id (NOT full JWT)
+        $userdata->token_id = $tokenId;
+        $userdata->save();
 
         return response()->json([
             'status' => true,
