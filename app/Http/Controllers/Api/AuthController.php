@@ -36,7 +36,7 @@ class AuthController extends Controller
 
 public function login(Request $request)
     {
-        $allowedCountries = ['GB', 'IM', 'JE', 'GG', 'GI'];
+        $allowedCountries = ['GB', 'IM', 'JE', 'GG', 'GI', 'IN'];
         $countryCode = null;
         $countryName = null;
  

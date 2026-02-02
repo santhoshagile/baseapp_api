@@ -16,6 +16,17 @@ class User extends Authenticatable
         'password',
         'token_id',
         'role_id',
+        'salutation',
+        'gender',
+        'country',
+        'state',
+        'city',
+        'mobile',
+        'mobile_code',
+        'status',
+        'slug',
+        'created_by',
+        'updated_by',
     ];
 
     protected $hidden = [
