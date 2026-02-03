@@ -10,6 +10,7 @@ Route::post('test', function () {
 });
 
 Route::middleware('auth:api')->group(function () {
+    Route::post('menutree', [MenuApiController::class, 'menutree']);
     Route::get('profile', [AuthController::class, 'profile']);
     Route::post('logout', [AuthController::class, 'logout']);
 });
