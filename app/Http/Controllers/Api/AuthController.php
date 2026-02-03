@@ -29,7 +29,7 @@ class AuthController extends Controller
 
         return response()->json([
             'status' => 'S',
-            'token' => $access_token,
+            'access_token' => $access_token,
             'user' => $user,
         ]);
     }
@@ -122,7 +122,7 @@ public function login(Request $request)
  
         return response()->json([
             'status' => 'S',
-            'token' => $accessToken,
+            'access_token' => $accessToken,
             'user' => $user,
             'country' => $countryName,
         ]);

@@ -9,6 +9,7 @@ use App\Models\Role;
 use App\Models\RoleMenu;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Auth;
 use Log;
 
 class MenuApiController extends Controller
