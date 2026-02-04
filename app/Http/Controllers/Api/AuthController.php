@@ -1,13 +1,13 @@
 <?php
 
 namespace App\Http\Controllers\Api;
-use Stevebauman\Location\Facades\Location;
+
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Log;
+use Stevebauman\Location\Facades\Location;
 
 class AuthController extends Controller
 {
@@ -34,12 +34,12 @@ class AuthController extends Controller
         ]);
     }
 
-public function login(Request $request)
+    public function login(Request $request)
     {
         $allowedCountries = ['GB', 'IM', 'JE', 'GG', 'GI', 'IN'];
         $countryCode = null;
         $countryName = null;
- 
+
         /**
          * 1️⃣ Try Cloudflare country header (BEST for production)
          */
@@ -47,7 +47,7 @@ public function login(Request $request)
             $countryCode = $request->header('CF-IPCountry');
             $countryName = $countryCode;
         }
- 
+
         /**
          * 2️⃣ Localhost handling (dev environment)
          */
@@ -55,20 +55,20 @@ public function login(Request $request)
             $countryCode = 'IN'; // allow localhost testing
             $countryName = 'INDIA';
         }
- 
+
         /**
          * 3️⃣ IP-based lookup fallback (non-local, non-cloudflare)
          */
         if (!$countryCode) {
             $ip = $request->ip();
             $location = Location::get($ip);
- 
+
             if ($location && $location->countryCode) {
                 $countryCode = $location->countryCode;
                 $countryName = $location->countryName;
             }
         }
- 
+
         /**
          * 4️⃣ Block if still unable to detect
          */
@@ -78,7 +78,7 @@ public function login(Request $request)
                 'message' => 'Unable to detect location',
             ], 403);
         }
- 
+
         /**
          * 5️⃣ Block if country not allowed
          */
@@ -89,7 +89,7 @@ public function login(Request $request)
                 'country' => $countryName,
             ], 403);
         }
- 
+
         /**
          * 6️⃣ Authenticate user
          */
@@ -99,27 +99,27 @@ public function login(Request $request)
                 'message' => 'Invalid credentials',
             ], 401);
         }
- 
+
         $user = Auth::user();
- 
+
         /**
          * 7️⃣ Revoke old tokens
          */
         $user->tokens()->delete();
- 
+
         /**
          * 8️⃣ Create new token
          */
         $tokenResult = $user->createToken('API Token');
         $accessToken = $tokenResult->accessToken;
         $tokenId = $tokenResult->token->id;
- 
+
         /**
          * 9️⃣ Save token id only
          */
         $user->token_id = $tokenId;
         $user->save();
- 
+
         return response()->json([
             'status' => 'S',
             'access_token' => $accessToken,
@@ -139,7 +139,7 @@ public function login(Request $request)
 
         return response()->json([
             'status' => 'S',
-            'message' => 'Logged out successfully'
+            'message' => 'Logged out successfully',
         ]);
     }
 }

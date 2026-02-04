@@ -19,12 +19,9 @@ return new class extends Migration
             $table->integer('updated_by')->nullable()->comment('Who last updated the record');
             $table->timestamps();
 
-            // ✅ Foreign keys (inside create)
+            //Foreign keys (inside create)
             $table->foreign('role_id')->references('id')->on('roles')->onDelete('CASCADE');
             $table->foreign('menu_id')->references('id')->on('menus')->onDelete('CASCADE');
-
-            // ⭐ IMPORTANT for pivot performance
-            $table->unique(['role_id', 'menu_id']);
         });
     }
 

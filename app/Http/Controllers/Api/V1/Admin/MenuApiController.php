@@ -9,7 +9,6 @@ use App\Models\Role;
 use App\Models\RoleMenu;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Auth;
 use Log;
 
 class MenuApiController extends Controller
@@ -144,7 +143,6 @@ class MenuApiController extends Controller
     public function menutree(Request $request)
     {
         try {
-            LOG::info("INSIDE MENU TREE");
             // $locale = $request->input('lang');
             // if (!in_array($locale, ['ar', 'en'])) {
             //     $locale = 'en';
@@ -188,7 +186,6 @@ class MenuApiController extends Controller
             }
             return response()->json(['status' => 'S', 'message' => trans('returnmessage.dataretreived'), 'menu' => $menus]);
         } catch (\Exception $e) {
-            LOG::info("INSIDE MENU TREE else");
             return response()->json(['status' => 'E', 'message' => trans('returnmessage.error_processing'), 'errordata' => $e->getmessage()]);
         }
     }
@@ -241,9 +238,9 @@ class MenuApiController extends Controller
     /**
      * @function: to fetch menu access details.
      *
-     * @author: Suprith S
+     * @author: Raghavendra kumar
      *
-     * @created-on: 3 Dec, 2022
+     * @created-on: 04 Jan, 2026
      *
      * @updated-on: N/A
      */
@@ -272,6 +269,7 @@ class MenuApiController extends Controller
     {
         try {
             $data = array();
+            Log::info($request);
             $parentids = array();
             $currenttime = date('Y-m-d h:i:s');
             RoleMenu::where('role_id', $request->role_id)->delete();
@@ -282,10 +280,11 @@ class MenuApiController extends Controller
                     $parentids[] = $parent_id;
                 }
             }
-
             $result = array_unique($parentids);
             $is_3rdlvl_exists = 'N';
+
             foreach ($result as $parent_menu_id) {
+
                 $data[] = ['role_id' => $request->role_id, 'menu_id' => $parent_menu_id, 'created_at' => $currenttime, 'updated_at' => $currenttime];
                 $main_parent_id = Menu::where('id', $parent_menu_id)->pluck('parent_id')->first();
                 if ($main_parent_id > 0) {
@@ -300,6 +299,7 @@ class MenuApiController extends Controller
                     $data[] = ['role_id' => $request->role_id, 'menu_id' => $main_parent_menu_id, 'created_at' => $currenttime, 'updated_at' => $currenttime];
                 }
             }
+
             RoleMenu::insert($data);
             return response()->json(['status' => 'S', 'message' => trans('returnmessage.saved_success')]);
         } catch (\Exception $e) {
