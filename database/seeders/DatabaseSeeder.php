@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -21,5 +20,6 @@ class DatabaseSeeder extends Seeder
         $this->call(superuser_menu_seeder::class);
         $this->call(LookupTemplateTypeSeeder::class);
         $this->call(add_email_templates_seeder::class);
+        $this->call(add_location_seeder::class);
     }
 }

@@ -5,10 +5,14 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-class AddLocationSeeder extends Seeder
+class add_location_seeder extends Seeder
 {
+    /**
+     * Run the database seeds.
+     */
     public function run(): void
     {
+
         /*
         |--------------------------------------------------------------------------
         | Country
@@ -63,5 +67,6 @@ class AddLocationSeeder extends Seeder
                 'slug' => 'bengaluru',
             ],
         ]);
+
     }
 }
