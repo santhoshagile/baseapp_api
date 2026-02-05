@@ -6,7 +6,7 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-class LookupTemplateTypeSeeder extends Seeder
+class lookup_template_type_seeder extends Seeder
 {
     /**
      * Run the database seeds.

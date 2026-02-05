@@ -18,7 +18,7 @@ class DatabaseSeeder extends Seeder
         $this->call(add_menu_dashboard::class);
         $this->call(add_role_seeder::class);
         $this->call(superuser_menu_seeder::class);
-        $this->call(LookupTemplateTypeSeeder::class);
+        $this->call(lookup_template_type_seeder::class);
         $this->call(add_email_templates_seeder::class);
         $this->call(add_location_seeder::class);
         $this->call(add_login_otp_verification_email_template_seeder::class);
