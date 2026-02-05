@@ -553,4 +553,102 @@ class RecoverPasswordApiController extends Controller
             return response()->json(['status' => 'E', 'message' => trans('returnmessage.error_processing'), 'error_data' => $e->getmessage()]);
         }
     }
+    /**
+     * @function: To send Password Reset.
+     *
+     * @author: Santhosha G
+     *
+     * @created-on: 05 Feb, 2026
+     *
+     * @updated-on: N/A
+     */
+    public function sendLoginOtp(Request $request)
+    {
+        try {
+            $otp = rand(100000, 999999);
+            $currenttime = date('Y-m-d h:i:s');
+            $otptime = strtotime($currenttime . ' + 5 minute');
+            $otptime = date('Y-m-d h:i:s', $otptime);
+            $otphash = \Hash::make($otp);
+
+            $updateOtp = User::where('email', $request->email)
+                ->update(['otp' => $otphash,
+                    'otp_valid_until' => $otptime]);
+
+            $user = User::where('email', $request->email)->first();
+            if (!$user) {
+                return response()->json(['status' => 'E', 'message' => trans('returnmessage.credentials_mismatch')]);
+            }
+            $emailTemplate = EmailTemplate::where('template_name', 'Login OTP Verification')->first();
+
+            if (isset($emailTemplate)) {
+                $actionText = null;
+                $actionUrl = null;
+                $userdata = ['firstname' => $user->name . ' ' . $user->lastname, 'otp' => $otp];
+                $parsedSubject = CustomFunctions::EmailContentParser($emailTemplate->template_subject, $userdata);
+                $parsedContent = CustomFunctions::EmailContentParser($emailTemplate->template_body, $userdata);
+                $paresedSignature = CustomFunctions::EmailContentParser($emailTemplate->template_signature, $userdata);
+                Mail::to($request->email)->send(new UserRegistrationMail($parsedSubject, $parsedContent, $paresedSignature, $actionText, $actionUrl));
+            }
+            return response()->json(['status' => 'S', 'message' => trans('returnmessage.login_otp_email_sent')]);
+
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'E', 'message' => trans('returnmessage.error_processing'), 'error_data' => $e->getmessage()]);
+        }
+    }
+    
+    /**
+     * @function: to validate Registration Otp.
+     *
+     * @author: Santhosha G
+     *
+     * @created-on: 05 Feb, 2026
+     *
+     * @updated-on: N/A
+     */
+    public function loginOtpValidate(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => ['required', 'email', 'max:255'],
+            'otp'   => 'required',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['status' => 'E', 'message' => $validator->errors()->all()]);
+        }
+        try {
+            $otp  = \Hash::make((int) $request->otp);
+            $user = User::where('email', $request->email)
+                ->first();
+            $currenttime = date('Y-m-d h:i:s');
+            if ($user) {
+
+                if ($currenttime > $user->otp_valid_until) {
+                    return response()->json(['status' => 'E', 'message' => trans('returnmessage.invalid_verification_code')]);
+                }
+                if (! Hash::check($request->otp, $user->otp)) {
+                    return response()->json(['status' => 'E', 'message' => trans('returnmessage.invalid_verification_code')]);
+                } else {
+                    $user->otp              = null;
+                    $user->status           = 1;
+                    $user->is_otp_validated = 1;
+                    $user->otp_valid_until  = null;
+                    $user->save();
+
+                    $userid       = $user->id;
+                    $logtype      = 'Login';
+                    $title        = 'Login Successful';
+                    $description  = $user->name . ' ' . $user->lastname . ' Login Successfully';
+                    $createdby    = $user->id;
+                    $creationdate = date('Y-m-d');
+
+                }
+                return response()->json(['status' => 'S', 'message' => trans('returnmessage.login_success')]);
+            } else {
+                return response()->json(['status' => 'E', 'message' => trans('returnmessage.invalid_verification_code')]);
+            }
+        } catch (\Exception $e) {
+            Log::info($e);
+            return response()->json(['status' => 'E', 'message' => trans('returnmessage.error_processing'), 'error_data' => $e->getmessage()]);
+        }
+    }
 }

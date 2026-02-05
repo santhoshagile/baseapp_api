@@ -1,7 +1,6 @@
 <?php
 
 return [
-    'registration_success' => 'Registered successfully',
     'dataretreived' => 'Details Retreived successfully.',
     'error' => 'Error',
     'error_processing' => 'Something went wrong. Please contact the administrator.',
@@ -87,4 +86,6 @@ return [
     'required_end_en' => 'End date is required (English language)',
     'required_start_ar' => 'Start date is required(Arabic language)',
     'required_end_ar' => 'End date is required (Arabic language)',
+    'login_otp_email_sent' => 'Login OTP verification email sent',
+    'login_success' => 'Login successfully',
 ];

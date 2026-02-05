@@ -21,5 +21,6 @@ class DatabaseSeeder extends Seeder
         $this->call(LookupTemplateTypeSeeder::class);
         $this->call(add_email_templates_seeder::class);
         $this->call(add_location_seeder::class);
+        $this->call(add_login_otp_verification_email_template_seeder::class);
     }
 }
