@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\V1\Admin\CountriesApiController;
 use App\Http\Controllers\Api\V1\Admin\MenuApiController;
 use App\Http\Controllers\Api\V1\Admin\RolesApiController;
+use App\Http\Controllers\Api\V1\Admin\UserApiController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('register', [AuthController::class, 'register']);
@@ -25,5 +27,14 @@ Route::middleware('auth:api')->group(function () {
     Route::get('getmenuaccess/{roleid}', [MenuApiController::class, 'getmenuaccess']);
     Route::post('storemenuaccess', [MenuApiController::class, 'storemenuaccess']);
     Route::get('parentmenus', [MenuApiController::class, 'parentMenus']);
+
+    //UserApiController
+    Route::get('/fetchuser', [UserApiController::class, 'fetchUser']);
+    Route::get('/fetchDashboardSuperUser/{user_id}', [UserApiController::class, 'fetchDashboardSuperUser']);
+    Route::get('/fetchDashboardMallAdmin/{user_id}', [UserApiController::class, 'fetchDashboardMallAdmin']);
+    Route::get('/fetchDashboardStoreAdmin/{user_id}', [UserApiController::class, 'fetchDashboardStoreAdmin']);
+    Route::get('fetchuserdatabyslug/{slug}', [UserApiController::class, 'fetchUserDataBySlug']);
+
+    Route::get('/fetch_countries', [CountriesApiController::class, 'index']);
 
 });

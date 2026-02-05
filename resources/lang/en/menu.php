@@ -11,4 +11,5 @@ return [
     'Countries' => 'Countries',
     'Users' => 'Admin Users',
     'Setup' => 'Setup',
+    'Institutions' => 'Institutions',
 ];
