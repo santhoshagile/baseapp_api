@@ -38,9 +38,9 @@ class RecoverPasswordApiController extends Controller
     /**
      * @function: to Send password reset link.
      *
-     * @author: Suprith S
+     * @author: Santhosha G
      *
-     * @created-on: 1 Dec, 2022
+     * @created-on: 04 Feb, 2026
      *
      * @updated-on: N/A
      */
@@ -56,9 +56,9 @@ class RecoverPasswordApiController extends Controller
     /**
      * @function: to Send Reset Link Email.
      *
-     * @author: Suprith S
+     * @author: Santhosha G
      *
-     * @created-on: 1 Dec, 2022
+     * @created-on: 04 Feb, 2026
      *
      * @updated-on: N/A
      */
@@ -104,9 +104,9 @@ class RecoverPasswordApiController extends Controller
      *
      * @function: Get the broker to be used during password reset.
      *
-     * @author: Suprith S
+     * @author: Santhosha G
      *
-     * @created-on: 1 Dec, 2022
+     * @created-on: 04 Feb, 2026
      *
      * @updated-on: N/A
      */
@@ -124,6 +124,10 @@ class RecoverPasswordApiController extends Controller
      * @param  \Illuminate\Http\Request  $request
      *
      * @param  string  $response
+     * 
+     * @author: Santhosha G
+     *
+     * @created-on: 04 Feb, 2026
      *
      * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
      */
@@ -147,6 +151,10 @@ class RecoverPasswordApiController extends Controller
      * @param  \Illuminate\Http\Request  $request
      *
      * @param  string  $response
+     * 
+     * @author: Santhosha G
+     *
+     * @created-on: 04 Feb, 2026
      *
      * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
      */
@@ -164,6 +172,10 @@ class RecoverPasswordApiController extends Controller
      * @param  \Illuminate\Http\Request  $request
      *
      * @param  string  $response
+     * 
+     * @author: Santhosha G
+     *
+     * @created-on: 04 Feb, 2026
      *
      * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
      */
@@ -182,6 +194,10 @@ class RecoverPasswordApiController extends Controller
      * @param  \Illuminate\Contracts\Auth\CanResetPassword  $user
      *
      * @param  string  $password
+     * 
+     * @author: Santhosha G
+     *
+     * @created-on: 04 Feb, 2026
      *
      * @return void
      */
@@ -202,6 +218,10 @@ class RecoverPasswordApiController extends Controller
      * @param  \Illuminate\Http\Request  $request
      *
      * @param  string  $response
+     * 
+     * @author: Santhosha G
+     *
+     * @created-on: 04 Feb, 2026
      *
      * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
      */
@@ -220,6 +240,10 @@ class RecoverPasswordApiController extends Controller
      * @param  \Illuminate\Http\Request  $request
      *
      * @param  string  $response
+     * 
+     * @author: Santhosha G
+     *
+     * @created-on: 04 Feb, 2026
      *
      * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
      */
@@ -232,12 +256,14 @@ class RecoverPasswordApiController extends Controller
         }
     }
 
-    //reset password trait functions
-
     /**
      * Reset the given user's password.
      *
      * @param  \Illuminate\Http\Request  $request
+     * 
+     * @author: Santhosha G
+     *
+     * @created-on: 04 Feb, 2026
      *
      * @return \Illuminate\Http\RedirectResponse
      *
@@ -278,7 +304,9 @@ class RecoverPasswordApiController extends Controller
     /**
      * @function: rules of recover password details.
      *
-     * @created-on: 1 Dec, 2022
+     * @author: Santhosha G
+     *
+     * @created-on: 04 Feb, 2026
      *
      * @updated-on: N/A
      */
@@ -298,7 +326,9 @@ class RecoverPasswordApiController extends Controller
     /**
      * @function: credentials of recover password details.
      *
-     * @created-on: 1 Dec, 2022
+     * @author: Santhosha G
+     *
+     * @created-on: 04 Feb, 2026
      *
      * @updated-on: N/A
      */
@@ -316,9 +346,9 @@ class RecoverPasswordApiController extends Controller
     /**
      * @function: OTP validation.
      *
-     * @author: Suprith S
+     * @author: Santhosha G
      *
-     * @created-on: 1 Dec, 2022
+     * @created-on: 04 Feb, 2026
      *
      * @updated-on: N/A
      */
@@ -365,7 +395,7 @@ class RecoverPasswordApiController extends Controller
      *
      * @author: Santhosha G
      *
-     * @created-on: 9 Dec, 2022
+     * @created-on: 04 Feb, 2026
      *
      * @updated-on: N/A
      */
@@ -409,7 +439,7 @@ class RecoverPasswordApiController extends Controller
      *
      * @author: Santhosha G
      *
-     * @created-on: 9 Dec, 2022
+     * @created-on: 04 Feb, 2026
      *
      * @updated-on: N/A
      */
@@ -431,8 +461,7 @@ class RecoverPasswordApiController extends Controller
                 return response()->json(['status' => 'E', 'message' => trans('returnmessage.credentials_mismatch')]);
             }
             $emailTemplate = EmailTemplate::where('template_name', 'Forgot Password')->first();
-            Log::info("email temolate will be");
-            Log::info($emailTemplate);
+
             if (isset($emailTemplate)) {
                 $actionText = null;
                 $actionUrl = null;
@@ -445,6 +474,7 @@ class RecoverPasswordApiController extends Controller
             return response()->json(['status' => 'S', 'message' => trans('returnmessage.password_reset_email_sent')]);
 
         } catch (\Exception $e) {
+            Log::info( $e);
             return response()->json(['status' => 'E', 'message' => trans('returnmessage.error_processing'), 'error_data' => $e->getmessage()]);
         }
 
