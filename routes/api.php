@@ -22,7 +22,6 @@ Route::middleware('throttle:5,2')->post('/resetuserpassword', [ChangePasswordApi
 Route::middleware('throttle:5,2')->post('resend_otp_validate', [RecoverPasswordApiController::class, 'sendRegistrationOtp']);
 Route::middleware('throttle:5,2')->post('registration_otp_validate', [UserRegistrationApiController::class, 'validateRegistrationOtp']);
 Route::middleware('throttle:5,2')->post('resetpassword', [RecoverPasswordApiController::class, 'validateOtp']);
-
 Route::middleware('auth:api')->group(function () {
     Route::get('profile', [AuthController::class, 'profile']);
     Route::post('logout', [AuthController::class, 'logout']);
@@ -60,6 +59,22 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/fetchDashboardStoreAdmin/{user_id}', [UserApiController::class, 'fetchDashboardStoreAdmin']);
     Route::get('fetchuserdatabyslug/{slug}', [UserApiController::class, 'fetchUserDataBySlug']);
 
+// CountriesApiController
     Route::get('/fetch_countries', [CountriesApiController::class, 'index']);
+    Route::post('/save_countries', [CountriesApiController::class, 'saveCountries']);
+    Route::get('/edit_countries/{slug}', [CountriesApiController::class, 'getCountriesBySlug']);
+    Route::get('/fetch_edit_countries/{id}', [CountriesApiController::class, 'getCountriesById']);
+    Route::post('/delete_countries/{id}', [CountriesApiController::class, 'deleteCountries']);
+    Route::get('/fetch_states', [CountriesApiController::class, 'fetchStates']);
+    Route::get('/fetch_states_name/{id}', [CountriesApiController::class, 'fetchStatesName']);
+    Route::post('/save_states', [CountriesApiController::class, 'saveStates']);
+    Route::get('/edit_states/{slug}', [CountriesApiController::class, 'getStatesBySlug']);
+    Route::get('/fetch_edit_states/{id}', [CountriesApiController::class, 'getStatesById']);
+    Route::post('/delete_states/{id}', [CountriesApiController::class, 'deleteStates']);
+    Route::get('/fetch_cities', [CountriesApiController::class, 'fetchCities']);
+    Route::get('/fetch_cities_name/{id}', [CountriesApiController::class, 'fetchCitiesName']);
+    Route::post('/save_cities', [CountriesApiController::class, 'saveCities']);
+    Route::get('/edit_cities/{slug}', [CountriesApiController::class, 'getCitiesBySlug']);
+    Route::post('/delete_cities/{id}', [CountriesApiController::class, 'deleteCities']);
 
 });

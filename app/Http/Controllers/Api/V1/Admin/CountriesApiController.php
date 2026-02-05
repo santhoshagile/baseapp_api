@@ -6,43 +6,26 @@ use App\Http\Controllers\Controller;
 use App\Models\Cities;
 use App\Models\Countries;
 use App\Models\States;
-use Auth;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-// use League\Csv\Reader;
 use Log;
-
-// use Maatwebsite\Excel\Facades\Excel;
 
 class CountriesApiController extends Controller
 {
-
-    public function __construct(Request $request)
-    {
-        $locale = $request->input('lang');
-        if (!in_array($locale, ['ar', 'en'])) {
-            $locale = 'en';
-        }
-        App::setLocale($locale);
-    }
     /**
      * @function: to fetch countries data.
      *
-     * @author: Stalvin
+     * @author: Raghavendra kumar
      *
-     * @created-on: 6 Dec, 2022
+     * @created-on: 05-02-2026
      *
-     * @updated-on: 7 Dec, 2022
+     * @updated-on: 05-02-2026
      */
     public function index()
     {
         try {
-            $countries_en = Countries::with('states', 'states.cities')->orderBy("updated_at", "desc")->where('lang', 'en')->get();
-            $countries_ar = Countries::with('states', 'states.cities')->orderBy("updated_at", "desc")->where('lang', 'ar')->get();
-
-            return response()->json(['status' => 'S', 'message' => trans('returnmessage.dataretreived'), 'countries_en' => $countries_en, 'countries_ar' => $countries_ar]);
+            $countries = Countries::with('states', 'states.cities')->get();
+            return response()->json(['status' => 'S', 'message' => trans('returnmessage.dataretreived'), 'countries' => $countries]);
         } catch (\Exception $e) {
             return response()->json(['status' => 'E', 'message' => trans('returnmessage.error_processing'), 'error_data' => $e->getmessage()]);
         }
@@ -51,17 +34,16 @@ class CountriesApiController extends Controller
     /**
      * @function: to fetch countries data using slug.
      *
-     * @author: Stalvin
+     * @author: Raghavendra kumar
      *
-     * @created-on: 6 Dec, 2022
+     * @created-on: 05-02-2026
      *
-     * @updated-on: 13 Dec, 2022
+     * @updated-on: 05-02-2026
      */
     public function getCountriesBySlug($slug)
     {
         try {
-            $header_id = Countries::where('slug', $slug)->value('header_id');
-            $countries = Countries::where('header_id', $header_id)->orderBy('id')->get(['id', 'name', 'mobile_code', 'lang', 'header_id']);
+            $countries = Countries::where('slug', $slug)->first();
             return response()->json(['status' => 'S', 'message' => trans('returnmessage.dataretreived'), 'countries' => $countries]);
         } catch (\Exception $e) {
             return response()->json(['status' => 'E', 'message' => trans('returnmessage.error_processing'), 'error_data' => $e->getmessage()]);
@@ -71,11 +53,11 @@ class CountriesApiController extends Controller
     /**
      * @function: to fetch countries data using Id.
      *
-     * @author: Stalvin
+     * @author: Raghavendra kumar
      *
-     * @created-on: 6 Dec, 2022
+     * @created-on: 05-02-2026
      *
-     * @updated-on: 13 Dec, 2022
+     * @updated-on: 05-02-2026
      */
     public function getCountriesById($id)
     {
@@ -90,70 +72,41 @@ class CountriesApiController extends Controller
     /**
      * @function: to save countries details.
      *
-     * @author: Stalvin
+     * @author: Raghavendra kumar
      *
-     * @created-on: 7 Dec, 2022
+     * @created-on: 05-02-2026
      *
-     * @updated-on: 12 Dec, 2022
+     * @updated-on: 05-02-2026
      */
     public function saveCountries(Request $request)
     {
+        $currenttime = date('Y-m-d h:i:s');
+        $id = $request->id;
+        $validator = Validator::make($request->all(), [
+            'name' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['status' => 'E', 'message' => $validator->errors()->all()]);
+        }
 
         try {
-            DB::beginTransaction();
-            $currenttime = date('Y-m-d h:i:s');
-            $datas = $request->all();
-            $message = "";
-            $header_id = 0;
-            foreach ($datas as $key => $data) {
-
-                $messages = [];
-                if ($data['lang'] === 'en') {
-                    $messages['name.required'] = trans('returnmessage.required_countryname_en');
-                } else {
-                    $messages['name.required'] = trans('returnmessage.required_countryname_ar');
-                }
-
-                $validator = Validator::make($data, [
-                    'name' => 'required',
-                    'mobile_code' => 'required',
-                ], $messages);
-
-                if ($validator->fails()) {
-                    return response()->json(['status' => 'E', 'message' => $validator->errors()->first()]);
-                } else {
-                    Log::info($data['name']);
-                    if ($data['id'] > 0) {
-                        Log::info('inside if');
-                        Countries::where('header_id', $data['header_id'])->where('lang', $data['lang'])
-                            ->update([
-                                'name' => $data['name'],
-                                'mobile_code' => $data['mobile_code'],
-                                'updated_by' => Auth::user()->id,
-                            ]);
-                        $message = trans('returnmessage.updatedsuccessfully');
-                    } else {
-                        $record = new Countries();
-                        $record->name = $data['name'];
-                        $record->mobile_code = $data['mobile_code'];
-                        $record->lang = $data['lang'];
-                        $record->created_by = Auth::user()->id;
-                        $record->save();
-                        $record->header_id = $header_id > 0 ? $header_id : $record->id;
-                        $record->save();
-                        $header_id = $record->header_id;
-                        // CustomFunctions::updateSlug($record->id, $record->name, 'countries');
-                        $message = trans('returnmessage.createdsuccessfully');
-
-                    }
-                }
+            if ($id > 0) {
+                $countries = Countries::where('id', $id)
+                    ->update([
+                        'name' => $request->name,
+                        'updated_at' => $currenttime,
+                    ]);
+                return response()->json(['status' => 'S', 'message' => trans('returnmessage.updatedsuccessfully'), 'countries' => $countries]);
+            } else {
+                $countries = Countries::create([
+                    'name' => $request->name,
+                    'updated_at' => $currenttime,
+                    'created_at' => $currenttime,
+                ]);
+                return response()->json(['status' => 'S', 'message' => trans('returnmessage.createdsuccessfully'), 'countries' => $countries]);
             }
-            DB::commit();
-            return response()->json(['status' => 'S', 'message' => $message]);
-
         } catch (\Exception $e) {
-            DB::rollback();
-            Log::info($e);
             return response()->json(['status' => 'E', 'message' => trans('returnmessage.error_processing'), 'errordata' => $e->getmessage()]);
         }
     }
@@ -161,16 +114,16 @@ class CountriesApiController extends Controller
     /**
      * @function: to delet countries details.
      *
-     * @author: Stalvin
+     * @author: Raghavendra kumar
      *
-     * @created-on: 7 Dec, 2022
+     * @created-on: 05-02-2026
      *
-     * @updated-on: N/A
+     * @updated-on: 05-02-2026
      */
     public function deleteCountries($id)
     {
         try {
-            $countries = Countries::where('header_id', $id)->delete();
+            $countries = Countries::where('id', $id)->delete();
             return response()->json(['status' => 'S', 'message' => trans('returnmessage.deletedsuccessfully')]);
         } catch (\Exception $e) {
             return response()->json(['status' => 'E', 'message' => trans('returnmessage.error_processing'), 'error_data' => $e->getmessage()]);
@@ -180,68 +133,43 @@ class CountriesApiController extends Controller
     /**
      * @function: to update countries status.
      *
-     * @author: Stalvin
+     * @author: Raghavendra kumar
      *
-     * @created-on: 12 Dec, 2022
+     * @created-on: 05-02-2026
      *
-     * @updated-on: N/A
+     * @updated-on: 05-02-2026
      */
     public function saveStates(Request $request)
     {
+
+        $currenttime = date('Y-m-d h:i:s');
+        $id = $request->id;
+        $validator = Validator::make($request->all(), [
+            'name' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['status' => 'E', 'message' => $validator->errors()->all()]);
+        }
+
         try {
-            DB::beginTransaction();
-            $currenttime = date('Y-m-d h:i:s');
-            $datas = $request->all();
-
-            $message = "";
-            $header_id = 0;
-
-            foreach ($datas as $key => $data) {
-                $messages = [];
-
-                if ($data['lang'] === 'en') {
-                    $messages['name.required'] = trans('returnmessage.required_statename_en');
-                } else {
-                    $messages['name.required'] = trans('returnmessage.required_statename_ar');
-                }
-
-                $validator = Validator::make($data, [
-                    'name' => 'required',
-                ], $messages);
-
-                if ($validator->fails()) {
-                    return response()->json(['status' => 'E', 'message' => $validator->errors()->first()]);
-                } else {
-                    if ($data['id'] > 0) {
-                        $states = States::where('header_id', $data['header_id'])->where('lang', $data['lang'])
-                            ->update([
-                                'name' => $data['name'],
-                                'updated_by' => Auth::user()->id,
-                            ]);
-                        $message = trans('returnmessage.updatedsuccessfully');
-                    } else {
-                        $states = new States();
-                        $states->name = $data['name'];
-                        $states->country_id = $data['country_id'];
-                        $states->lang = $data['lang'];
-                        $states->created_by = Auth::user()->id;
-                        $states->save();
-                        $states->header_id = $header_id > 0 ? $header_id : $states->id;
-                        $states->save();
-                        $header_id = $states->header_id;
-
-                        // CustomFunctions::updateSlug($states->id, $states->name, 'states');
-                        $message = trans('returnmessage.createdsuccessfully');
-                    }
-                }
+            if ($id > 0) {
+                $states = States::where('id', $id)
+                    ->update([
+                        'name' => $request->name,
+                        'updated_at' => $currenttime,
+                    ]);
+                return response()->json(['status' => 'S', 'message' => trans('returnmessage.updatedsuccessfully'), 'states' => $states]);
+            } else {
+                $states = States::create([
+                    'name' => $request->name,
+                    'country_id' => $request->country_id,
+                    'updated_at' => $currenttime,
+                    'created_at' => $currenttime,
+                ]);
+                return response()->json(['status' => 'S', 'message' => trans('returnmessage.createdsuccessfully'), 'states' => $states]);
             }
-
-            DB::commit();
-            return response()->json(['status' => 'S', 'message' => $message]);
-
         } catch (\Exception $e) {
-            Log::info($e);
-            DB::rollback();
             return response()->json(['status' => 'E', 'message' => trans('returnmessage.error_processing'), 'errordata' => $e->getmessage()]);
         }
     }
@@ -249,22 +177,25 @@ class CountriesApiController extends Controller
     /**
      * @function: to setch states details.
      *
-     * @author: Stalvin
+     * @author: Raghavendra kumar
      *
-     * @created-on: 7 Dec, 2022
+     * @created-on: 05-02-2026
      *
-     * @updated-on: 8 Dec, 2022
+     * @updated-on: 05-02-2026
      */
     public function fetchStates(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'countryname' => 'required',
+        ]);
+
         try {
-
-            $country = Countries::where('slug', $request->countryslug)->first();
-            $headerid = $country['header_id'];
-
-            $states_en = States::where('country_id', $headerid)->orderBy("updated_at", "desc")->where('lang', 'en')->get();
-            $states_ar = States::where('country_id', $headerid)->orderBy("updated_at", "desc")->where('lang', 'ar')->get();
-            return response()->json(['status' => 'S', 'message' => trans('returnmessage.dataretreived'), 'states_en' => $states_en, 'states_ar' => $states_ar, 'countries' => $country]);
+            if ($validator->fails()) {
+                return response()->json(['status' => 'E', 'message' => $validator->errors()->all()]);
+            }
+            $countries = Countries::where('slug', $request->countryname)->first();
+            $states = States::where('country_id', $countries->id)->get();
+            return response()->json(['status' => 'S', 'message' => trans('returnmessage.dataretreived'), 'states' => $states, 'countries' => $countries]);
         } catch (\Exception $e) {
             return response()->json(['status' => 'E', 'message' => trans('returnmessage.error_processing'), 'error_data' => $e->getmessage()]);
         }
@@ -273,23 +204,18 @@ class CountriesApiController extends Controller
     /**
      * @function: to setch states details using slug.
      *
-     * @author: Stalvin
+     * @author: Raghavendra kumar
      *
-     * @created-on: 12 Dec, 2022
+     * @created-on: 05-02-2026
      *
-     * @updated-on: 13 Dec, 2022
+     * @updated-on: 05-02-2026
      */
     public function getStatesBySlug($slug)
     {
         try {
-            $header_id = States::where('slug', $slug)->value('header_id');
-
-            $state = States::where('header_id', $header_id)->orderby('id')->get();
-            $country_id = $state[0]['country_id'];
-
-            $country = Countries::where('header_id', $country_id)->orderBy('id')->get();
-
-            return response()->json(['status' => 'S', 'message' => trans('returnmessage.dataretreived'), 'state' => $state, 'country' => $country]);
+            $states = States::with('country')->where('slug', $slug)->first();
+            $country_id = States::where('slug', $slug)->first('country_id');
+            return response()->json(['status' => 'S', 'message' => trans('returnmessage.dataretreived'), 'states' => $states, 'country_id' => $country_id->country_id]);
         } catch (\Exception $e) {
             return response()->json(['status' => 'E', 'message' => trans('returnmessage.error_processing'), 'error_data' => $e->getmessage()]);
         }
@@ -298,11 +224,11 @@ class CountriesApiController extends Controller
     /**
      * @function: to setch states details using Id.
      *
-     * @author: Stalvin
+     * @author: Raghavendra kumar
      *
-     * @created-on: 12 Dec, 2022
+     * @created-on: 05-02-2026
      *
-     * @updated-on: 13 Dec, 2022
+     * @updated-on: 05-02-2026
      */
     public function getStatesById($id)
     {
@@ -317,18 +243,19 @@ class CountriesApiController extends Controller
     /**
      * @function: to setch states name.
      *
-     * @author: Stalvin
+     * @author: Raghavendra kumar
      *
-     * @created-on: 7 Dec, 2022
+     * @created-on: 05-02-2026
      *
-     * @updated-on: N/A
+     * @updated-on: 05-02-2026
      */
-    public function fetchStatesName($id)
+    public function fetchStatesName(Request $request)
     {
         try {
-            $states_en = States::where('country_id', $id)->where('lang', 'en')->get();
-            $states_ar = States::where('country_id', $id)->where('lang', 'ar')->get();
-            return response()->json(['status' => 'S', 'message' => trans('returnmessage.dataretreived'), 'states_en' => $states_en, 'states_ar' => $states_ar]);
+            $country_id = Countries::where('name', $request->name)->first();
+            $cid = $country_id->id;
+            $name = States::where('country_id', $cid)->get();
+            return response()->json(['status' => 'S', 'message' => trans('returnmessage.dataretreived'), 'states' => $name]);
         } catch (\Exception $e) {
             return response()->json(['status' => 'E', 'message' => trans('returnmessage.error_processing'), 'error_data' => $e->getmessage()]);
         }
@@ -337,18 +264,20 @@ class CountriesApiController extends Controller
     /**
      * @function: to setch cities name.
      *
-     * @author: Stalvin
+     * @author: Raghavendra kumar
      *
-     * @created-on: 7 Dec, 2022
+     * @created-on: 05-02-2026
      *
-     * @updated-on: N/A
+     * @updated-on: 05-02-2026
      */
-    public function fetchCitiesName($id)
+    public function fetchCitiesName(Request $request)
     {
         try {
-            $cities_en = Cities::where('state_id', $id)->where('lang', 'en')->get();
-            $cities_ar = Cities::where('state_id', $id)->where('lang', 'ar')->get();
-            return response()->json(['status' => 'S', 'message' => trans('returnmessage.dataretreived'), 'cities_en' => $cities_en, 'cities_ar' => $cities_ar]);
+
+            $state_id = States::where('name', $request->name)->first();
+            $sid = $state_id->id;
+            $name = Cities::where('state_id', $sid)->get();
+            return response()->json(['status' => 'S', 'message' => trans('returnmessage.dataretreived'), 'cities' => $name]);
         } catch (\Exception $e) {
             return response()->json(['status' => 'E', 'message' => trans('returnmessage.error_processing'), 'error_data' => $e->getmessage()]);
         }
@@ -357,19 +286,18 @@ class CountriesApiController extends Controller
     /**
      * @function: to delete states.
      *
-     * @author: Stalvin
+     * @author: Raghavendra kumar
      *
-     * @created-on: 7 Dec, 2022
+     * @created-on: 05-02-2026
      *
-     * @updated-on: N/A
+     * @updated-on: 05-02-2026
      */
     public function deleteStates($id)
     {
         try {
-            $states = States::where('header_id', $id)->delete();
+            $states = States::where('id', $id)->delete();
             return response()->json(['status' => 'S', 'message' => trans('returnmessage.deletedsuccessfully')]);
         } catch (\Exception $e) {
-            Log::info($e);
             return response()->json(['status' => 'E', 'message' => trans('returnmessage.error_processing'), 'error_data' => $e->getmessage()]);
         }
     }
@@ -377,67 +305,45 @@ class CountriesApiController extends Controller
     /**
      * @function: to save cities details.
      *
-     * @author: Stalvin
+     * @author: Raghavendra kumar
      *
-     * @created-on: 7 Dec, 2022
+     * @created-on: 05-02-2026
      *
-     * @updated-on: N/A
+     * @updated-on: 05-02-2026
      */
     public function saveCities(Request $request)
     {
+        // Log::info("REQUEST IN SAVE CITIES");
+        // Log::info($request);die;
+        $currenttime = date('Y-m-d h:i:s');
+        $id = $request->id;
+        $validator = Validator::make($request->all(), [
+            'name' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['status' => 'E', 'message' => $validator->errors()->all()]);
+        }
+
         try {
-            DB::beginTransaction();
-            $currenttime = date('Y-m-d h:i:s');
-            $datas = $request->all();
-            $message = "";
-            $header_id = 0;
-
-            foreach ($datas as $key => $data) {
-
-                $messages = [];
-                if ($data['lang'] === 'en') {
-                    $messages['name.required'] = trans('returnmessage.required_cityname_en');
-                } else {
-                    $messages['name.required'] = trans('returnmessage.required_cityname_ar');
-                }
-
-                $validator = Validator::make($data, [
-                    'name' => 'required',
-                ], $messages);
-
-                if ($validator->fails()) {
-                    return response()->json(['status' => 'E', 'message' => $validator->errors()->first()]);
-                } else {
-                    if ($data['id'] > 0) {
-                        $cities = Cities::where('header_id', $data['header_id'])->where('lang', $data['lang'])
-                            ->update([
-                                'name' => $data['name'],
-                                'updated_by' => Auth::user()->id,
-                            ]);
-                        $message = trans('returnmessage.updatedsuccessfully');
-                    } else {
-                        $cities = new Cities();
-                        $cities->name = $data['name'];
-                        $cities->lang = $data['lang'];
-                        $cities->country_id = $data['country_id'];
-                        $cities->state_id = $data['state_id'];
-                        $cities->created_by = Auth::user()->id;
-                        $cities->save();
-                        $cities->header_id = $header_id > 0 ? $header_id : $cities->id;
-                        $cities->save();
-                        $header_id = $cities->header_id;
-                        // CustomFunctions::updateSlug($cities->id, $cities->name, 'cities');
-                        $message = trans('returnmessage.createdsuccessfully');
-                    }
-                }
-
+            if ($id > 0) {
+                $cities = Cities::where('id', $id)
+                    ->update([
+                        'name' => $request->name,
+                        'updated_at' => $currenttime,
+                    ]);
+                return response()->json(['status' => 'S', 'message' => trans('returnmessage.updatedsuccessfully'), 'cities' => $cities]);
+            } else {
+                $cities = Cities::create([
+                    'name' => $request->name,
+                    'country_id' => $request->country_id,
+                    'state_id' => $request->state_id,
+                    'updated_at' => $currenttime,
+                    'created_at' => $currenttime,
+                ]);
+                return response()->json(['status' => 'S', 'message' => trans('returnmessage.createdsuccessfully'), 'cities' => $cities]);
             }
-            DB::commit();
-            return response()->json(['status' => 'S', 'message' => $message]);
-
         } catch (\Exception $e) {
-            Log::info($e);
-            DB::rollback();
             return response()->json(['status' => 'E', 'message' => trans('returnmessage.error_processing'), 'errordata' => $e->getmessage()]);
         }
     }
@@ -445,23 +351,32 @@ class CountriesApiController extends Controller
     /**
      * @function: to fetch cities details.
      *
-     * @author: Stalvin
+     * @author: Raghavendra kumar
      *
-     * @created-on: 7 Dec, 2022
+     * @created-on: 05-02-2026
      *
-     * @updated-on: N/A
+     * @updated-on: 05-02-2026
      */
     public function fetchCities(Request $request)
     {
+        Log::info("REQUEST IN CITIES");
+        Log::info($request); //die;
+
+        $validator = Validator::make($request->all(), [
+            'countryname' => 'required',
+            'statename' => 'required',
+        ]);
 
         try {
-            $state = States::where('slug', $request->statename)->first();
-            $header_id = $state->header_id;
+            if ($validator->fails()) {
+                return response()->json(['status' => 'E', 'message' => $validator->errors()->all()]);
+            }
+            $state_id = States::where('slug', $request->statename)->first();
+            $sid = $state_id->id;
             $countries = Countries::where('slug', $request->countryname)->first();
 
-            $cities_en = Cities::where('state_id', $header_id)->where('lang', 'en')->orderBy("updated_at", "desc")->get();
-            $cities_ar = Cities::where('state_id', $header_id)->where('lang', 'ar')->orderBy("updated_at", "desc")->get();
-            return response()->json(['status' => 'S', 'message' => trans('returnmessage.dataretreived'), 'cities_en' => $cities_en, 'cities_ar' => $cities_ar, 'state' => $state]);
+            $cities = Cities::where('state_id', $sid)->get();
+            return response()->json(['status' => 'S', 'message' => trans('returnmessage.dataretreived'), 'cities' => $cities, 'states' => $state_id, 'countries' => $countries]);
         } catch (\Exception $e) {
             return response()->json(['status' => 'E', 'message' => trans('returnmessage.error_processing'), 'error_data' => $e->getmessage()]);
         }
@@ -470,21 +385,19 @@ class CountriesApiController extends Controller
     /**
      * @function: to fetch cities details using slug.
      *
-     * @author: Stalvin
+     * @author: Raghavendra kumar
      *
-     * @created-on: 7 Dec, 2022
+     * @created-on: 05-02-2026
      *
-     * @updated-on: 13 Dec, 2022
+     * @updated-on: 05-02-2026
      */
     public function getCitiesBySlug($slug)
     {
         try {
-            $header_id = Cities::where('slug', $slug)->value('header_id');
-
-            $city = Cities::where('header_id', $header_id)->orderby('id')->get();
-            $state = States::where('header_id', $city[0]['state_id'])->orderBy('id')->get();
-            $country = Countries::where('header_id', $city[0]['country_id'])->get();
-            return response()->json(['status' => 'S', 'message' => trans('returnmessage.dataretreived'), 'city' => $city, 'state' => $state, 'country' => $country]);
+            $cities = Cities::with('state', 'country')->where('slug', $slug)->first();
+            $state_id = Cities::where('slug', $slug)->first('state_id');
+            $country_id = Cities::where('slug', $slug)->first('country_id');
+            return response()->json(['status' => 'S', 'message' => trans('returnmessage.dataretreived'), 'cities' => $cities, 'state_id' => $state_id->state_id, 'country_id' => $country_id->country_id]);
         } catch (\Exception $e) {
             return response()->json(['status' => 'E', 'message' => trans('returnmessage.error_processing'), 'error_data' => $e->getmessage()]);
         }
@@ -493,104 +406,17 @@ class CountriesApiController extends Controller
     /**
      * @function: to delete cities details.
      *
-     * @author: Stalvin
+     * @author: Raghavendra kumar
      *
-     * @created-on: 7 Dec, 2022
+     * @created-on: 05-02-2026
      *
-     * @updated-on: N/A
+     * @updated-on: 05-02-2026
      */
     public function deleteCities($id)
     {
         try {
-            $cities = Cities::where('header_id', $id)->delete();
+            $cities = Cities::where('id', $id)->delete();
             return response()->json(['status' => 'S', 'message' => trans('returnmessage.deletedsuccessfully')]);
-        } catch (\Exception $e) {
-            Log::info($e);
-            return response()->json(['status' => 'E', 'message' => trans('returnmessage.error_processing'), 'error_data' => $e->getmessage()]);
-        }
-    }
-
-    public function InsertCountryTemplate(Request $request)
-    {
-        try {
-            DB::beginTransaction();
-            Log::info($request);
-            foreach ($request->file as $key => $data) {
-                if ($key > 0) {
-                    $mobileCodeEn = '+' . ltrim($data[1], '+');
-                    $mobileCodeAr = '+' . ltrim($data[5], '+');
-                    $country_en = Countries::firstOrCreate([
-                        'name' => $data[0],
-                        'lang' => 'en',
-                    ], [
-                        'mobile_code' => $mobileCodeEn,
-                    ]);
-    
-                    $country_ar = Countries::firstOrCreate([
-                        'name' => $data[4],
-                        'lang' => 'ar',
-                    ], 
-                    [
-                        'header_id' => $country_en->id,
-                        'mobile_code' => $mobileCodeAr,
-                    ]);
-    
-                    Countries::where('id', $country_en->id)->update([
-                        'header_id' => $country_en->id,
-                    ]);
-    
-                    $state_en = States::firstOrCreate([
-                        'name' => $data[2],
-                        'lang' => 'en',
-                        'country_id' => $country_en->id,
-                    ]);
-                    
-                    $state_ar = States::firstOrCreate([
-                        'name' => $data[6],
-                        'lang' => 'ar',
-                        'country_id' => $country_en->id,
-                    ], [
-                        'header_id' => $state_en->id,
-                    ]);
-    
-                    if ($state_en->wasRecentlyCreated) {
-                        $state_en->update(['header_id' => $state_en->id]);
-                    }
-    
-                    $city_en = Cities::firstOrCreate([
-                        'name' => $data[3],
-                        'lang' => 'en',
-                        'country_id' => $country_en->id,
-                        'state_id' => $state_en->id,
-                    ]);
-                    
-                    $city_ar = Cities::firstOrCreate([
-                        'name' => $data[7],
-                        'lang' => 'ar',
-                        'country_id' => $country_en->id,
-                        'state_id' => $state_en->id,
-                    ], [
-                        'header_id' => $city_en->id, 
-                    ]);
-    
-                    if ($city_en->wasRecentlyCreated) {
-                        $city_en->update(['header_id' => $city_en->id]);
-                    }
-                }
-            }
-            DB::commit();
-            return response()->json(['status' => 'S', 'message' => trans('returnmessage.createdsuccessfully')]);
-        } catch (\Exception $e) {
-            DB::rollback();
-            return response()->json(['status' => 'E', 'message' => trans('returnmessage.error_processing'), 'error_data' => $e->getmessage()]);
-        }
-    }
-    
-    public function fetchCountryCodes()
-    {
-        try {
-            $country_codes = Countries::orderBy("updated_at", "desc")->where('lang', 'en')->get(['id','header_id','name','mobile_code']);
-            return response()->json(['status' => 'S', 'message' => trans('returnmessage.dataretreived'), 'country_codes' => $country_codes]);
         } catch (\Exception $e) {
             return response()->json(['status' => 'E', 'message' => trans('returnmessage.error_processing'), 'error_data' => $e->getmessage()]);
         }

@@ -4,11 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
 
 class Cities extends Model
 {
-    use HasFactory;
+    use HasFactory, HasSlug;
 
     public $table = 'cities';
 
@@ -36,5 +37,12 @@ class Cities extends Model
     public function country()
     {
         return $this->hasOne('App\Models\Countries', 'id', 'country_id');
+    }
+
+    public function getSlugOptions(): SlugOptions
+    {
+        return SlugOptions::create()
+            ->generateSlugsFrom('name')
+            ->saveSlugsTo('slug');
     }
 }

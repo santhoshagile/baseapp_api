@@ -12,4 +12,6 @@ return [
     'Users' => 'Admin Users',
     'Setup' => 'Setup',
     'Institutions' => 'Institutions',
+    'States' => 'States',
+    'Cities' => 'Cities',
 ];
