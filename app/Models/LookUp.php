@@ -4,11 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
 
 class LookUp extends Model
 {
-    use HasFactory;
+    use HasFactory, HasSlug;
 
     public $table = 'lookups';
 
@@ -32,6 +33,13 @@ class LookUp extends Model
         , 'created_at'
         , 'updated_at',
     ];
+
+    public function getSlugOptions(): SlugOptions
+    {
+        return SlugOptions::create()
+            ->generateSlugsFrom('shortname')
+            ->saveSlugsTo('slug');
+    }
 
     public function childlookup()
     {

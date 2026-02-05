@@ -2,9 +2,11 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\V1\Admin\CountriesApiController;
+use App\Http\Controllers\Api\V1\Admin\FileUploadApiController;
 use App\Http\Controllers\Api\V1\Admin\LookupsApiController;
 use App\Http\Controllers\Api\V1\Admin\MenuApiController;
 use App\Http\Controllers\Api\V1\Admin\RolesApiController;
+use App\Http\Controllers\Api\V1\Admin\SystemParameterApiController;
 use App\Http\Controllers\Api\V1\Admin\UserApiController;
 use App\Http\Controllers\Api\V1\Auth\RecoverPasswordApiController;
 use App\Http\Controllers\Api\V1\Auth\UserRegistrationApiController;
@@ -43,7 +45,7 @@ Route::middleware('auth:api')->group(function () {
 //LookupsApiController
     Route::get('lookupdata/{type}', [LookupsApiController::class, 'lookupdata']);
     Route::get('child_lookups_edit', [LookupsApiController::class, 'childLookupEdit']);
-    Route::resource('lookups', 'App\Http\Controllers\Api\V1\Admin\LookupsApiController');
+    Route::resource('lookups', LookupsApiController::class);
     Route::get('/fetchlookup', [LookupsApiController::class, 'fetchLookup']);
     Route::get('/fetch_lang_lookup', [LookupsApiController::class, 'fetchLangLookup']);
     Route::post('/update_lookups_status', [LookupsApiController::class, 'updateLookupStatus']);
@@ -76,5 +78,20 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/save_cities', [CountriesApiController::class, 'saveCities']);
     Route::get('/edit_cities/{slug}', [CountriesApiController::class, 'getCitiesBySlug']);
     Route::post('/delete_cities/{id}', [CountriesApiController::class, 'deleteCities']);
+
+    // System Parameters
+    Route::get('/getsystem_params', [SystemParameterApiController::class, 'index']);
+    Route::post('/save_system_params', [SystemParameterApiController::class, 'store']);
+    Route::get('/edit_system_params/{slug}', [SystemParameterApiController::class, 'editSystemParameter']);
+    Route::post('/delete_system_params/{id}', [SystemParameterApiController::class, 'deleteSystemParameter']);
+    Route::get('/fetch_system_params', [SystemParameterApiController::class, 'fetchsystemparameter']);
+    Route::post('/update_system_param_status', [SystemParameterApiController::class, 'updateSystemParamStatus']);
+    Route::get('/fetch_image_url', [SystemParameterApiController::class, 'fetchImageUrl']);
+    Route::get('/fetch-products-tags-status', [SystemParameterApiController::class, 'fetchProductsTagsStatus']);
+
+    //File Upload Method
+    Route::post('/imageupload', [FileUploadApiController::class, 'imageUpload']);
+    Route::post('/file_upload', [FileUploadApiController::class, 'fileUpload']);
+    Route::post('/imageUrlBase64', [FileUploadApiController::class, 'imageUrlBase64']);
 
 });
