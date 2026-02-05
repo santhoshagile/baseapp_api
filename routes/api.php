@@ -17,7 +17,7 @@ Route::post('register', [AuthController::class, 'register']);
 
 //Login
 Route::middleware('throttle:5,2')->post('/login', [AuthController::class, 'login']);
-
+Route::get('/fetch_image_url', [SystemParameterApiController::class, 'fetchImageUrl']);
 //Password Reset and Resend Otp
 Route::middleware('throttle:5,2')->post('reset_password', [RecoverPasswordApiController::class, 'sendPasswordReset']);
 Route::middleware('throttle:5,2')->post('/resetuserpassword', [ChangePasswordApiController::class, 'changePassword']);
@@ -86,7 +86,6 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/delete_system_params/{id}', [SystemParameterApiController::class, 'deleteSystemParameter']);
     Route::get('/fetch_system_params', [SystemParameterApiController::class, 'fetchsystemparameter']);
     Route::post('/update_system_param_status', [SystemParameterApiController::class, 'updateSystemParamStatus']);
-    Route::get('/fetch_image_url', [SystemParameterApiController::class, 'fetchImageUrl']);
     Route::get('/fetch-products-tags-status', [SystemParameterApiController::class, 'fetchProductsTagsStatus']);
 
     //File Upload Method
