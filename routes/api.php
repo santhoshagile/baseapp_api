@@ -27,10 +27,10 @@ Route::middleware('auth:api')->group(function () {
     Route::get('profile', [AuthController::class, 'profile']);
     Route::post('logout', [AuthController::class, 'logout']);
 
-    // RolesApiController
+// RolesApiController
     Route::resource('roles', RolesApiController::class);
 
-    //MenuApiController
+//MenuApiController
     Route::post('menutree', [MenuApiController::class, 'menutree']);
     Route::resource('menu', MenuApiController::class);
     Route::get('rolemenu', [MenuApiController::class, 'rolemenu']);
@@ -38,10 +38,10 @@ Route::middleware('auth:api')->group(function () {
     Route::post('storemenuaccess', [MenuApiController::class, 'storemenuaccess']);
     Route::get('parentmenus', [MenuApiController::class, 'parentMenus']);
 
-    // Email Templates
+// Email Templates
     Route::resource('emailtemplates', 'App\Http\Controllers\Api\V1\Admin\EmailTemplateApiController');
 
-    //LookupsApiController
+//LookupsApiController
     Route::get('lookupdata/{type}', [LookupsApiController::class, 'lookupdata']);
     Route::get('child_lookups_edit', [LookupsApiController::class, 'childLookupEdit']);
     Route::resource('lookups', 'App\Http\Controllers\Api\V1\Admin\LookupsApiController');
@@ -53,7 +53,7 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/save_child_lookups', [LookupsApiController::class, 'store_child_lookups']);
     Route::post('/delete_lookup/{id}', [LookupsApiController::class, 'destroy']);
 
-    //UserApiController
+//UserApiController
     Route::get('/fetchuser', [UserApiController::class, 'fetchUser']);
     Route::get('/fetchDashboardSuperUser/{user_id}', [UserApiController::class, 'fetchDashboardSuperUser']);
     Route::get('/fetchDashboardMallAdmin/{user_id}', [UserApiController::class, 'fetchDashboardMallAdmin']);
