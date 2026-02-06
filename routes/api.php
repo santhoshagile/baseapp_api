@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\V1\Admin\CountriesApiController;
 use App\Http\Controllers\Api\V1\Admin\FileUploadApiController;
+use App\Http\Controllers\Api\V1\Admin\InstitutionApiController;
 use App\Http\Controllers\Api\V1\Admin\LookupsApiController;
 use App\Http\Controllers\Api\V1\Admin\MenuApiController;
 use App\Http\Controllers\Api\V1\Admin\RolesApiController;
@@ -95,5 +96,7 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/imageupload', [FileUploadApiController::class, 'imageUpload']);
     Route::post('/file_upload', [FileUploadApiController::class, 'fileUpload']);
     Route::post('/imageUrlBase64', [FileUploadApiController::class, 'imageUrlBase64']);
+
+    Route::resource('institution', InstitutionApiController::class);
 
 });
