@@ -88,4 +88,5 @@ return [
     'required_end_ar' => 'End date is required (Arabic language)',
     'login_otp_email_sent' => 'Login OTP verification email sent',
     'login_success' => 'Login successfully',
+    'invalid_credentials' => 'Invalid credentials',
 ];
