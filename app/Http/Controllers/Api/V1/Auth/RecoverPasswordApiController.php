@@ -21,6 +21,8 @@ use Illuminate\Support\Facades\Validator;
 use Log;
 use Mail;
 use Twilio\Rest\Client;
+use Auth;
+use Stevebauman\Location\Facades\Location;
 
 class RecoverPasswordApiController extends Controller
 {
@@ -560,11 +562,73 @@ class RecoverPasswordApiController extends Controller
      *
      * @created-on: 05 Feb, 2026
      *
-     * @updated-on: N/A
+     * @updated-on: 09 Feb, 2026
      */
     public function sendLoginOtp(Request $request)
     {
         try {
+            $allowedCountries = ['GB', 'IM', 'JE', 'GG', 'GI', 'IN'];
+            $countryCode = null;
+            $countryName = null;
+
+            /**
+             * Try Cloudflare country header (BEST for production)
+             */
+            if ($request->hasHeader('CF-IPCountry')) {
+                $countryCode = $request->header('CF-IPCountry');
+                $countryName = $countryCode;
+            }
+
+            /**
+             * Localhost handling (dev environment)
+             */
+            if (!$countryCode && app()->environment('local')) {
+                $countryCode = 'IN'; // allow localhost testing
+                $countryName = 'INDIA';
+            }
+
+            /**
+             * IP-based lookup fallback (non-local, non-cloudflare)
+             */
+            if (!$countryCode) {
+                $ip = $request->ip();
+                $location = Location::get($ip);
+
+                if ($location && $location->countryCode) {
+                    $countryCode = $location->countryCode;
+                    $countryName = $location->countryName;
+                }
+            }
+
+            /**
+             * Block if still unable to detect
+             */
+            if (!$countryCode) {
+                return response()->json([
+                    'status' => 'E',
+                    'message' => 'Unable to detect location',
+                ], 403);
+            }
+
+            /**
+             * Block if country not allowed
+             */
+            if (!in_array($countryCode, $allowedCountries)) {
+                return response()->json([
+                    'status' => 'E',
+                    'message' => 'Login not allowed from your country',
+                    'country' => $countryName,
+                ], 403);
+            }
+            /**
+             * Authenticate user
+             */
+            if (!Auth::attempt($request->only('email', 'password'))) {
+                 return response()->json(['status' => 'E', 'message' => trans('returnmessage.invalid_credentials')]);
+            }
+            /**
+             * Sending OTP to user
+             */
             $otp = rand(100000, 999999);
             $currenttime = date('Y-m-d h:i:s');
             $otptime = strtotime($currenttime . ' + 5 minute');
