@@ -23,7 +23,7 @@ class add_superuser_seeder extends Seeder
         $quotes = ['[', ']'];
         $parentid = str_replace($quotes, '', $locale);
 
-        $password = 'agile@456';
+        $password = 'Agileidc@456';
         $password = Hash::make($password);
         DB::table('users')->insert([
             [
