@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Stevebauman\Location\Facades\Location;
 
 class AuthController extends Controller
 {
@@ -35,8 +36,62 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
+        $allowedCountries = ['GB', 'IM', 'JE', 'GG', 'GI', 'IN'];
+        $countryCode = null;
+        $countryName = null;
+
         /**
-         * Authenticate user
+         * 1 Try Cloudflare country header (BEST for production)
+         */
+        if ($request->hasHeader('CF-IPCountry')) {
+            $countryCode = $request->header('CF-IPCountry');
+            $countryName = $countryCode;
+        }
+
+        /**
+         * 2 Localhost handling (dev environment)
+         */
+        if (!$countryCode && app()->environment('local')) {
+            $countryCode = 'IN'; // allow localhost testing
+            $countryName = 'INDIA';
+        }
+
+        /**
+         * 3 IP-based lookup fallback (non-local, non-cloudflare)
+         */
+        if (!$countryCode) {
+            $ip = $request->ip();
+            $location = Location::get($ip);
+
+            if ($location && $location->countryCode) {
+                $countryCode = $location->countryCode;
+                $countryName = $location->countryName;
+            }
+        }
+
+        /**
+         * 4 Block if still unable to detect
+         */
+        if (!$countryCode) {
+            return response()->json([
+                'status' => 'E',
+                'message' => 'Unable to detect location',
+            ], 403);
+        }
+
+        /**
+         * 5 Block if country not allowed
+         */
+        if (!in_array($countryCode, $allowedCountries)) {
+            return response()->json([
+                'status' => 'E',
+                'message' => 'Login not allowed from your country',
+                'country' => $countryName,
+            ], 403);
+        }
+
+        /**
+         * 6 Authenticate user
          */
         if (!Auth::attempt($request->only('email', 'password'))) {
             return response()->json([
@@ -48,19 +103,19 @@ class AuthController extends Controller
         $user = Auth::user();
 
         /**
-         * Revoke old tokens
+         * 7 Revoke old tokens
          */
         $user->tokens()->delete();
 
         /**
-         * Create new token
+         * 8 Create new token
          */
         $tokenResult = $user->createToken('API Token');
         $accessToken = $tokenResult->accessToken;
         $tokenId = $tokenResult->token->id;
 
         /**
-         * Save token id only
+         * 9 Save token id only
          */
         $user->token_id = $tokenId;
         $user->save();
@@ -69,6 +124,7 @@ class AuthController extends Controller
             'status' => 'S',
             'access_token' => $accessToken,
             'user' => $user,
+            'country' => $countryName,
         ]);
     }
 

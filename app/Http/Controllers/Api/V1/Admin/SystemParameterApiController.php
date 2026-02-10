@@ -62,8 +62,9 @@ class SystemParameterApiController extends Controller
         try {
             $app_name = '';
             $systemparameters = SystemParameters::where('parameter_name', 'APP_LOGO')->where('status', 1)->first();
+            $login_otp_enabled = SystemParameters::where('parameter_name', 'LOGIN_OTP_ENABLED')->first();
             $app_name = config('values.APP_NAME');
-            return response()->json(['status' => 'S', 'message' => trans('returnmessage.dataretreived'), 'parameter_image' => $systemparameters, 'application_name' => $app_name]);
+            return response()->json(['status' => 'S', 'message' => trans('returnmessage.dataretreived'), 'parameter_image' => $systemparameters, 'application_name' => $app_name, 'login_otp_enabled' => $login_otp_enabled]);
         } catch (\Exception $e) {
             return response()->json(['status' => 'E', 'message' => trans('returnmessage.error_processing'), 'error_data' => $e->getmessage()]);
         }
