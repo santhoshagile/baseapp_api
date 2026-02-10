@@ -23,6 +23,8 @@ class add_location_seeder extends Seeder
             [
                 'name' => 'India',
                 'mobile_code' => '+91',
+                'country_code' => 'IN',
+                'is_whitelisted' => 1,
                 'status' => 1,
                 'slug' => 'india',
             ],

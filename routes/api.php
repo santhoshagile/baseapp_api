@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\V1\Admin\CountriesApiController;
+use App\Http\Controllers\Api\V1\Admin\ChangePasswordApiController;
 use App\Http\Controllers\Api\V1\Admin\FileUploadApiController;
 use App\Http\Controllers\Api\V1\Admin\LookupsApiController;
 use App\Http\Controllers\Api\V1\Admin\MenuApiController;
@@ -25,7 +26,7 @@ Route::middleware('throttle:5,2')->post('resend_otp_validate', [RecoverPasswordA
 Route::middleware('throttle:5,2')->post('registration_otp_validate', [UserRegistrationApiController::class, 'validateRegistrationOtp']);
 Route::middleware('throttle:5,2')->post('resetpassword', [RecoverPasswordApiController::class, 'validateOtp']);
 Route::middleware('throttle:5,2')->post('login_otp_validate', [RecoverPasswordApiController::class, 'loginOtpValidate']);
-Route::middleware('throttle:5,2')->post('send_login_otp', [RecoverPasswordApiController::class, 'sendLoginOtp']);
+Route::middleware('throttle:5,2')->post('send_login_otp', [AuthController::class, 'sendLoginOtp']);
 
 Route::middleware('auth:api')->group(function () {
     Route::get('profile', [AuthController::class, 'profile']);
@@ -81,6 +82,7 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/save_cities', [CountriesApiController::class, 'saveCities']);
     Route::get('/edit_cities/{slug}', [CountriesApiController::class, 'getCitiesBySlug']);
     Route::post('/delete_cities/{id}', [CountriesApiController::class, 'deleteCities']);
+    Route::post('/update_country_status', [CountriesApiController::class, 'updateCountryStatus']);
 
     // System Parameters
     Route::get('/getsystem_params', [SystemParameterApiController::class, 'index']);
@@ -89,7 +91,7 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/delete_system_params/{id}', [SystemParameterApiController::class, 'deleteSystemParameter']);
     Route::get('/fetch_system_params', [SystemParameterApiController::class, 'fetchsystemparameter']);
     Route::post('/update_system_param_status', [SystemParameterApiController::class, 'updateSystemParamStatus']);
-    Route::get('/fetch-products-tags-status', [SystemParameterApiController::class, 'fetchProductsTagsStatus']);
+    Route::get('/fetch_products_tags_status', [SystemParameterApiController::class, 'fetchProductsTagsStatus']);
 
     //File Upload Method
     Route::post('/imageupload', [FileUploadApiController::class, 'imageUpload']);

@@ -3,11 +3,17 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\CustomClass\CustomFunctions;
+use App\Models\EmailTemplate;
 use App\Models\User;
+use App\Models\Countries;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Stevebauman\Location\Facades\Location;
+use App\Mail\UserRegistrationMail;
+use Mail;
+use Log;
 
 class AuthController extends Controller
 {
@@ -34,34 +40,31 @@ class AuthController extends Controller
         ]);
     }
 
-    public function login(Request $request)
+    private function validateCountryAccess(Request $request)
     {
-        $allowedCountries = ['GB', 'IM', 'JE', 'GG', 'GI', 'IN'];
+        $allowedCountries = Countries::where('is_whitelisted', 1)
+            ->pluck('country_code')
+            ->toArray();
+
         $countryCode = null;
         $countryName = null;
 
-        /**
-         * 1 Try Cloudflare country header (BEST for production)
-         */
+        // Cloudflare
         if ($request->hasHeader('CF-IPCountry')) {
             $countryCode = $request->header('CF-IPCountry');
             $countryName = $countryCode;
         }
 
-        /**
-         * 2 Localhost handling (dev environment)
-         */
+        // Localhost
         if (!$countryCode && app()->environment('local')) {
-            $countryCode = 'IN'; // allow localhost testing
+            $countryCode = 'IN';
             $countryName = 'INDIA';
         }
 
-        /**
-         * 3 IP-based lookup fallback (non-local, non-cloudflare)
-         */
+        // IP fallback
         if (!$countryCode) {
             $ip = $request->ip();
-            $location = Location::get($ip);
+            $location = \Location::get($ip);
 
             if ($location && $location->countryCode) {
                 $countryCode = $location->countryCode;
@@ -69,36 +72,116 @@ class AuthController extends Controller
             }
         }
 
-        /**
-         * 4 Block if still unable to detect
-         */
+        // Not detected
         if (!$countryCode) {
-            return response()->json([
-                'status' => 'E',
-                'message' => 'Unable to detect location',
-            ], 403);
+            return [
+                'success' => false,
+                'message' => 'Unable to detect location'
+            ];
         }
 
-        /**
-         * 5 Block if country not allowed
-         */
+        // Not allowed
         if (!in_array($countryCode, $allowedCountries)) {
-            return response()->json([
-                'status' => 'E',
+            return [
+                'success' => false,
                 'message' => 'Login not allowed from your country',
-                'country' => $countryName,
-            ], 403);
+                'country' => $countryName
+            ];
         }
 
-        /**
-         * 6 Authenticate user
-         */
+        // success
+        return [
+            'success' => true,
+            'country_code' => $countryCode,
+            'country_name' => $countryName
+        ];
+    }
+
+    /**
+     * @function: To send Password Reset.
+     *
+     * @author: Santhosha G
+     *
+     * @created-on: 05 Feb, 2026
+     *
+     * @updated-on: 09 Feb, 2026
+     */
+    public function sendLoginOtp(Request $request)
+    {
+        try {
+            // Authenticate user
+            if (!Auth::attempt($request->only('email', 'password'))) {
+                return response()->json([
+                    'status' => 'E',
+                    'message' => trans('returnmessage.invalid_credentials'),
+                ], 401);
+            }
+
+            $countryCheck = $this->validateCountryAccess($request);
+
+            if (!$countryCheck['success']) {
+                return response()->json([
+                    'status' => 'E',
+                    'message' => $countryCheck['message'],
+                    'country' => $countryCheck['country'] ?? null
+                ], 403);
+            }
+
+            $countryName = $countryCheck['country_name'];
+
+            // Sending OTP to user
+            $otp = rand(100000, 999999);
+            $currenttime = date('Y-m-d h:i:s');
+            $otptime = strtotime($currenttime . ' + 5 minute');
+            $otptime = date('Y-m-d h:i:s', $otptime);
+            $otphash = \Hash::make($otp);
+
+            $updateOtp = User::where('email', $request->email)
+                ->update(['otp' => $otphash,
+                    'otp_valid_until' => $otptime]);
+
+            $user = User::where('email', $request->email)->first();
+            if (!$user) {
+                return response()->json(['status' => 'E', 'message' => trans('returnmessage.credentials_mismatch')]);
+            }
+            $emailTemplate = EmailTemplate::where('template_name', 'Login OTP Verification')->first();
+
+            if (isset($emailTemplate)) {
+                $actionText = null;
+                $actionUrl = null;
+                $userdata = ['firstname' => $user->name . ' ' . $user->lastname, 'otp' => $otp];
+                $parsedSubject = CustomFunctions::EmailContentParser($emailTemplate->template_subject, $userdata);
+                $parsedContent = CustomFunctions::EmailContentParser($emailTemplate->template_body, $userdata);
+                $paresedSignature = CustomFunctions::EmailContentParser($emailTemplate->template_signature, $userdata);
+                Mail::to($request->email)->send(new UserRegistrationMail($parsedSubject, $parsedContent, $paresedSignature, $actionText, $actionUrl));
+            }
+            return response()->json(['status' => 'S', 'message' => trans('returnmessage.login_otp_email_sent')]);
+
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'E', 'message' => trans('returnmessage.error_processing'), 'error_data' => $e->getmessage()]);
+        }
+    }
+
+    public function login(Request $request)
+    {
+        // Authenticate user
         if (!Auth::attempt($request->only('email', 'password'))) {
             return response()->json([
                 'status' => 'E',
-                'message' => 'Invalid credentials',
+                'message' => trans('returnmessage.invalid_credentials'),
             ], 401);
         }
+        $countryCheck = $this->validateCountryAccess($request);
+
+        if (!$countryCheck['success']) {
+            return response()->json([
+                'status' => 'E',
+                'message' => $countryCheck['message'],
+                'country' => $countryCheck['country'] ?? null
+            ], 403);
+        }
+
+        $countryName = $countryCheck['country_name'];
 
         $user = Auth::user();
 

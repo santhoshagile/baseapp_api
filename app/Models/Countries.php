@@ -21,6 +21,8 @@ class Countries extends Model
     protected $fillable = [
         'name'
         , 'mobile_code'
+        , 'country_code'
+        , 'is_whitelisted'
         , 'header_id'
         , 'lang'
         , 'status'

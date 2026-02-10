@@ -24,7 +24,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            //
+            $table->dropColumn(['otp', 'otp_valid_until', 'is_otp_validated']);
         });
     }
 };
