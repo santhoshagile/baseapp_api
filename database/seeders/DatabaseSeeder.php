@@ -30,6 +30,9 @@ class DatabaseSeeder extends Seeder
         $this->runSeeder(add_countries_seeder::class);
         $this->runSeeder(add_menu_action_master_seeder::class);
         $this->runSeeder(lookup_action_categories_seeder::class);
+        $this->runSeeder(add_institution_menu_seeder::class);
+        $this->runSeeder(institutions_data_seeder::class);
+        $this->runSeeder(add_salutation_lookup_seeder::class);
     }
 
     /**

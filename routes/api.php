@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\V1\Admin\InstitutionApiController;
 use App\Http\Controllers\Api\V1\Admin\CountriesApiController;
 use App\Http\Controllers\Api\V1\Admin\ChangePasswordApiController;
 use App\Http\Controllers\Api\V1\Admin\FileUploadApiController;
@@ -34,10 +35,11 @@ Route::middleware('auth:api')->group(function () {
     Route::get('profile', [AuthController::class, 'profile']);
     Route::post('logout', [AuthController::class, 'logout']);
 
-// RolesApiController
+    // RolesApiController
     Route::resource('roles', RolesApiController::class);
+    Route::get('/fetchrole', [RolesApiController::class, 'fetchRole']);
 
-//MenuApiController
+    //MenuApiController
     Route::post('menutree', [MenuApiController::class, 'menutree']);
     Route::resource('menu', MenuApiController::class);
     Route::get('rolemenu', [MenuApiController::class, 'rolemenu']);
@@ -45,29 +47,30 @@ Route::middleware('auth:api')->group(function () {
     Route::post('storemenuaccess', [MenuApiController::class, 'storemenuaccess']);
     Route::get('parentmenus', [MenuApiController::class, 'parentMenus']);
 
-// Email Templates
+    // Email Templates
     Route::resource('emailtemplates', 'App\Http\Controllers\Api\V1\Admin\EmailTemplateApiController');
 
-//LookupsApiController
+    //LookupsApiController
     Route::get('lookupdata/{type}', [LookupsApiController::class, 'lookupdata']);
     Route::get('child_lookups_edit', [LookupsApiController::class, 'childLookupEdit']);
     Route::resource('lookups', LookupsApiController::class);
     Route::get('/fetchlookup', [LookupsApiController::class, 'fetchLookup']);
-    Route::get('/fetch_lang_lookup', [LookupsApiController::class, 'fetchLangLookup']);
     Route::post('/update_lookups_status', [LookupsApiController::class, 'updateLookupStatus']);
     Route::post('/fetch_parent_lookup', [LookupsApiController::class, 'fetchParentLookup']);
     Route::post('/save_lookups', [LookupsApiController::class, 'store_lookups']);
     Route::post('/save_child_lookups', [LookupsApiController::class, 'store_child_lookups']);
     Route::post('/delete_lookup/{id}', [LookupsApiController::class, 'destroy']);
 
-//UserApiController
+    //UserApiController
     Route::get('/fetchuser', [UserApiController::class, 'fetchUser']);
     Route::get('/fetchDashboardSuperUser/{user_id}', [UserApiController::class, 'fetchDashboardSuperUser']);
     Route::get('/fetchDashboardMallAdmin/{user_id}', [UserApiController::class, 'fetchDashboardMallAdmin']);
     Route::get('/fetchDashboardStoreAdmin/{user_id}', [UserApiController::class, 'fetchDashboardStoreAdmin']);
     Route::get('fetchuserdatabyslug/{slug}', [UserApiController::class, 'fetchUserDataBySlug']);
+    Route::get('fetchuserbyslug/{slug}', [UserApiController::class, 'fetchUserBySlug']);
+    Route::post('/saveuser', [UserApiController::class, 'saveuser']);
 
-// CountriesApiController
+    // CountriesApiController
     Route::get('/fetch_countries', [CountriesApiController::class, 'index']);
     Route::post('/save_countries', [CountriesApiController::class, 'saveCountries']);
     Route::get('/edit_countries/{slug}', [CountriesApiController::class, 'getCountriesBySlug']);
@@ -103,5 +106,8 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/imageupload', [FileUploadApiController::class, 'imageUpload']);
     Route::post('/file_upload', [FileUploadApiController::class, 'fileUpload']);
     Route::post('/imageUrlBase64', [FileUploadApiController::class, 'imageUrlBase64']);
+
+    // Institution Api Controller
+    Route::resource('institution', InstitutionApiController::class);
 
 });
