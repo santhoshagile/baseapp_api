@@ -9,6 +9,8 @@ use App\Http\Controllers\Api\V1\Admin\MenuApiController;
 use App\Http\Controllers\Api\V1\Admin\RolesApiController;
 use App\Http\Controllers\Api\V1\Admin\SystemParameterApiController;
 use App\Http\Controllers\Api\V1\Admin\UserApiController;
+use App\Http\Controllers\Api\V1\Admin\ActionMasterApiController;
+
 use App\Http\Controllers\Api\V1\Auth\RecoverPasswordApiController;
 use App\Http\Controllers\Api\V1\Auth\UserRegistrationApiController;
 use Illuminate\Support\Facades\Route;
@@ -92,6 +94,10 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/fetch_system_params', [SystemParameterApiController::class, 'fetchsystemparameter']);
     Route::post('/update_system_param_status', [SystemParameterApiController::class, 'updateSystemParamStatus']);
     Route::get('/fetch_products_tags_status', [SystemParameterApiController::class, 'fetchProductsTagsStatus']);
+
+    // Action Master
+    Route::resource('/action_master', ActionMasterApiController::class);
+    Route::post('/update_action_master_status', [ActionMasterApiController::class, 'updateActionMasterStatus']);
 
     //File Upload Method
     Route::post('/imageupload', [FileUploadApiController::class, 'imageUpload']);

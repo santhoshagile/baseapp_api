@@ -28,6 +28,8 @@ class DatabaseSeeder extends Seeder
         $this->runSeeder(add_login_otp_verification_email_template_seeder::class);
         $this->runSeeder(add_system_parameter_basic_data::class);
         $this->runSeeder(add_countries_seeder::class);
+        $this->runSeeder(add_menu_action_master_seeder::class);
+        $this->runSeeder(lookup_action_categories_seeder::class);
     }
 
     /**
