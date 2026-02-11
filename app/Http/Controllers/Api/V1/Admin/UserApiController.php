@@ -94,7 +94,6 @@ class UserApiController extends Controller
                             'dob' => $request->dob,
                             'email' => $request->email,
                             'mobile' => $request->mobile,
-                            'phone' => $request->phone,
                             'mobile_code' => $request->mobile_code,
                             'role_id' => $request->role_id,
                             'address' => $request->address,
@@ -119,11 +118,9 @@ class UserApiController extends Controller
                         'lastname' => Str::ucfirst($request->lastname),
                         'email' => $request->email,
                         'gender' => $request->gender,
-                        // 'dob' => $request->dob,
-                        'store_id' => $request->store_id,
+                        'dob' => $request->dob,
                         'password' => $password,
                         'mobile' => $request->mobile,
-                        'phone' => $request->phone,
                         'mobile_code' => $request->mobile_code,
                         'role_id' => $request->role_id,
                         'address' => $request->address,
@@ -136,22 +133,7 @@ class UserApiController extends Controller
                         'created_at' => $currenttime,
                         'updated_at' => $currenttime,
                     ]);
-                    $rolename = Role::where('id', $request->role_id)->value('rolename');
 
-                    if ($rolename == 'StoreAdmin') {
-                        $store_name = Stores::where('header_id', $request->store_id)->first(['name', 'mall_name']);
-                        $mall_name = Stores::where('header_id', $store_name->mall_name)->value('name');
-                        $emailTemplate = EmailTemplate::where('template_name', 'StoreAdmin Credentials')->first(); // die();
-                        if (isset($emailTemplate)) {
-                            $actionText = null;
-                            $actionUrl = null;
-                            $userdata = ['name' => $request->name, 'password' => $generated_password, 'storename' => $store_name->name, 'email' => $request->email, 'mall_name' => $mall_name, 'website' => config('mail.cms_app_url')];
-                            $parsedSubject = CustomFunctions::EmailContentParser($emailTemplate->template_subject, $userdata);
-                            $parsedContent = CustomFunctions::EmailContentParser($emailTemplate->template_body, $userdata);
-                            $paresedSignature = CustomFunctions::EmailContentParser($emailTemplate->template_signature, $userdata);
-                            Mail::to($request->email)->send(new UserRegistrationMail($parsedSubject, $parsedContent, $paresedSignature, $actionText, $actionUrl));
-                        }
-                    }
                     DB::commit();
                     return response()->json(['status' => 'S', 'message' => trans('returnmessage.createdsuccessfully'), 'userdata' => $users]);
                 }

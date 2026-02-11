@@ -13,7 +13,7 @@ class lookup_template_type_seeder extends Seeder
      */
     public function run(): void
     {
-               DB::table('lookups')->insert([
+        DB::table('lookups')->insert([
             [
                 'shortname' => 'TEMPLATE_TYPE',
                 'longname' => 'TEMPLATE_TYPE',
