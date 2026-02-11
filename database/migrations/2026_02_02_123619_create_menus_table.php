@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('menus', function (Blueprint $table) {
-            $table->id()->comment('Primary Key Field');
+            $table->bigIncrements('id')->comment('primary key');
             $table->integer('is_header')->default(0)->comment('Is this a Main Header Menu');
             $table->string('title')->comment('Name of the Menu Title');
             $table->string('icon')->comment('Icon or Image for a Menu')->nullable();
