@@ -69,6 +69,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get('fetchuserdatabyslug/{slug}', [UserApiController::class, 'fetchUserDataBySlug']);
     Route::get('fetchuserbyslug/{slug}', [UserApiController::class, 'fetchUserBySlug']);
     Route::post('/saveuser', [UserApiController::class, 'saveuser']);
+    Route::post('updateuserstatus', [UserApiController::class, 'updateUserStatus']);
 
     // CountriesApiController
     Route::get('/fetch_countries', [CountriesApiController::class, 'index']);
