@@ -233,4 +233,51 @@ class ActionMasterApiController extends Controller
         }
     }
 
+    public function checkActionPermission(Request $request)
+    {
+        try {
+
+            $role_id = $request->role_id;
+
+            if (! is_numeric($role_id)) {
+                return response()->json([
+                    'status'  => "E",
+                    'message' => "Invalid Role ID",
+                ], 400);
+            }
+
+            // Get all active action_ids for role
+            $actionIds = RoleAction::where('role_id', $role_id)
+                ->where('status', 1)
+                ->pluck('action_id');
+
+            if ($actionIds->isEmpty()) {
+                return response()->json([
+                    'status'      => "S",
+                    'permissions' => [],
+                    'message'     => "No permissions found",
+                ]);
+            }
+
+            // Get action names
+            $permissions = ActionMaster::whereIn('id', $actionIds)
+                ->pluck('action_name');
+
+            return response()->json([
+                'status'      => "S",
+                'permissions' => $permissions,
+                'message'     => "Permissions fetched successfully",
+            ]);
+
+        } catch (\Exception $e) {
+
+            \Log::error("Permission Fetch Error: " . $e->getMessage());
+
+            return response()->json([
+                'status'  => "E",
+                'message' => "Something went wrong while fetching permissions.",
+            ], 500);
+        }
+    }
+
 }

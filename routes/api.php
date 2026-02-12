@@ -103,6 +103,7 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/update_action_master_status', [ActionMasterApiController::class, 'updateActionMasterStatus']);
     Route::get('/fetchroleactions/{role_id}', [ActionMasterApiController::class, 'fetchRoleActions']);
     Route::post('/storeactionaccess', [ActionMasterApiController::class, 'storeRoleAction']);
+    Route::get('/check_action_permission', [ActionMasterApiController::class, 'checkActionPermission']);
 
 
     //File Upload Method
