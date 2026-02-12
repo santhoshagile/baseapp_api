@@ -22,17 +22,12 @@ class DatabaseSeeder extends Seeder
         $this->runSeeder(add_menu_dashboard::class);
         $this->runSeeder(add_role_seeder::class);
         $this->runSeeder(superuser_menu_seeder::class);
-        $this->runSeeder(lookup_template_type_seeder::class);
+        $this->runSeeder(add_basic_lookups_seeder::class);
         $this->runSeeder(add_email_templates_seeder::class);
         $this->runSeeder(add_location_seeder::class);
-        $this->runSeeder(add_login_otp_verification_email_template_seeder::class);
         $this->runSeeder(add_system_parameter_basic_data::class);
-        $this->runSeeder(add_countries_seeder::class);
-        $this->runSeeder(add_menu_action_master_seeder::class);
-        $this->runSeeder(lookup_action_categories_seeder::class);
-        $this->runSeeder(add_institution_menu_seeder::class);
         $this->runSeeder(institutions_data_seeder::class);
-        $this->runSeeder(add_salutation_lookup_seeder::class);
+
     }
 
     /**

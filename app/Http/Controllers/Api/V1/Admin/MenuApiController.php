@@ -55,7 +55,6 @@ class MenuApiController extends Controller
             if (Menu::where('title', $request->title)->count() > 0) {
                 return response()->json(['status' => 'E', 'message' => trans('returnmessage.menu') . ' ' . $request->title . ', ' . trans('returnmessage.already_exists')]);
             }
-            $request['is_header'] = 0;
             $menu = Menu::create($request->all());
 
             CustomFunctions::updateSlug($menu->id, $request->title, 'menus');
@@ -203,7 +202,6 @@ class MenuApiController extends Controller
     {
         try {
             $menus = Menu::Where('parent_id', 0)
-                ->where('is_header', 0)
                 ->with('children')
                 ->select('id', 'title as name')
                 ->orderBy('seq', 'asc')
@@ -227,7 +225,7 @@ class MenuApiController extends Controller
     public function parentMenus()
     {
         try {
-            $parentmenus = Menu::where('is_header', 0)->where('parent_id', '<', 1)->orderBy('title')->get();
+            $parentmenus = Menu::where('parent_id', '<', 1)->orderBy('title')->get();
             return response()->json(['status' => 'S', 'mesage' => trans('returnmessage.dataretreived'), 'parentmenu' => $parentmenus]);
 
         } catch (\Exception $e) {

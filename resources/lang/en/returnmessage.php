@@ -16,7 +16,6 @@ return [
     'password_reset_success' => 'Password reset successfully.',
     'password_reset_email' => 'Password reset email sent',
     'saved_success' => 'Saved successfully',
-    'deletedsuccessfully' => 'Deleted successfully',
     'error_delete' => 'Error. Unable to delete record',
     'data_return' => 'Retrieved successfully',
     'details_not_found' => 'Details not found',
@@ -39,7 +38,6 @@ return [
     'uploaded_successfully' => 'Uploaded successfully',
     'error_processing' => 'Error processing the details. Retry Again.',
     'saved_success' => 'Saved successfully',
-    'deletedsuccessfully' => 'Deleted successfully',
     'updatedsuccessfully' => 'Updated successfully',
     'dataretreived' => 'Details retreived successfully.',
     'already_exists' => 'Data already exist with the entered name.',
@@ -89,4 +87,5 @@ return [
     'login_otp_email_sent' => 'Login OTP verification email sent',
     'login_success' => 'Login successfully',
     'invalid_credentials' => 'Invalid credentials',
+    'document_uploaded_success' => 'Document uploaded successfully',
 ];
