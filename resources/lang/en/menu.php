@@ -15,4 +15,5 @@ return [
     'States' => 'States',
     'Cities' => 'Cities',
     'Action Master' => 'Action Master',
+    'Documents' => 'Documents',
 ];

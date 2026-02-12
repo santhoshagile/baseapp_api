@@ -113,5 +113,12 @@ Route::middleware('auth:api')->group(function () {
 
     // Institution Api Controller
     Route::resource('institution', InstitutionApiController::class);
-
+    
+    // Document Controller
+    Route::get('/fetch_documents', [DocumentApiController::class, 'index']);
+    Route::get('/documents/{slug}', [DocumentApiController::class, 'editDocument']);
+    Route::post('/create_document', [DocumentApiController::class, 'store']);
+    Route::patch('/documents/{id}', [DocumentApiController::class, 'update']);
+    Route::post('/upload_file', [DocumentApiController::class, 'uploadFile']);
+    Route::delete('/documents/{id}', [DocumentApiController::class, 'delete']);
 });
