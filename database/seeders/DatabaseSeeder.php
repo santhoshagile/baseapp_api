@@ -46,7 +46,7 @@ class DatabaseSeeder extends Seeder
         $className       = class_basename($seederClass);
         $alreadyExecuted = DB::table('database_seeder')
             ->where('seeder', $className)
-            ->where('status', 'Active')
+            ->where('status', 1)
             ->exists();
         if ($alreadyExecuted) {
             return;
@@ -54,7 +54,7 @@ class DatabaseSeeder extends Seeder
             $this->call($seederClass);
             DB::table('database_seeder')->insert([
                 'seeder' => $className,
-                'status' => 'Active',
+                'status' => 1,
             ]);
         }
     }

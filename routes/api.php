@@ -101,6 +101,9 @@ Route::middleware('auth:api')->group(function () {
     // Action Master
     Route::resource('/action_master', ActionMasterApiController::class);
     Route::post('/update_action_master_status', [ActionMasterApiController::class, 'updateActionMasterStatus']);
+    Route::get('/fetchroleactions/{role_id}', [ActionMasterApiController::class, 'fetchRoleActions']);
+    Route::post('/storeactionaccess', [ActionMasterApiController::class, 'storeRoleAction']);
+
 
     //File Upload Method
     Route::post('/imageupload', [FileUploadApiController::class, 'imageUpload']);

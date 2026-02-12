@@ -3,6 +3,7 @@ namespace App\Http\Controllers\Api\V1\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\ActionMaster;
+use App\Models\RoleAction;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -160,6 +161,73 @@ class ActionMasterApiController extends Controller
                 'status'  => 'E',
                 'message' => 'Error updating action status: ' . $e->getMessage(),
             ]);
+        }
+    }
+
+    public function fetchRoleActions($roleId)
+    {
+        try {
+
+            $assignedActions = RoleAction::where('role_id', $roleId)
+                ->where('status', 1)
+                ->pluck('action_id')
+                ->toArray();
+
+            $actions = ActionMaster::orderBy('id')
+                ->get()
+                ->map(function ($action) use ($assignedActions) {
+                    return [
+                        'id'          => $action->id,
+                        'action_name' => $action->action_name,
+                        'checked'     => in_array($action->id, $assignedActions),
+                    ];
+                });
+
+            return response()->json([
+                'status'  => 'S',
+                'actions' => $actions,
+            ]);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'status'  => 'E',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function storeRoleAction(Request $request)
+    {
+        try {
+
+            $roleId    = $request->role_id;
+            $actionIds = $request->role_access ?? [];
+
+            RoleAction::where('role_id', $roleId)
+                ->delete();
+
+            foreach ($actionIds as $actionId) {
+                RoleAction::insert([
+                    'role_id'    => $roleId,
+                    'action_id'  => $actionId,
+                    'status'     => 1,
+                    'created_by' => Auth::id(),
+                    'created_at' => now(),
+                ]);
+            }
+
+            return response()->json([
+                'status'  => 'S',
+                'message' => 'Role actions updated successfully',
+            ]);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'status'  => 'E',
+                'message' => $e->getMessage(),
+            ], 500);
         }
     }
 
