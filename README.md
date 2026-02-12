@@ -27,6 +27,10 @@ php artisan storage:link
 You can start the API server using PHP’s built-in development server.
 
 ```bash
+php artisan optimize:clear
+php artisan config:clear 
+php artisan config:cache
+
 php -S 127.0.0.1:8000 -t public
 ```
 

@@ -11,7 +11,7 @@ use App\Http\Controllers\Api\V1\Admin\RolesApiController;
 use App\Http\Controllers\Api\V1\Admin\SystemParameterApiController;
 use App\Http\Controllers\Api\V1\Admin\UserApiController;
 use App\Http\Controllers\Api\V1\Admin\ActionMasterApiController;
-
+use App\Http\Controllers\Api\V1\Admin\DocumentApiController;
 use App\Http\Controllers\Api\V1\Auth\RecoverPasswordApiController;
 use App\Http\Controllers\Api\V1\Auth\UserRegistrationApiController;
 use Illuminate\Support\Facades\Route;

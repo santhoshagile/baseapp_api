@@ -16,7 +16,6 @@ class add_menu_dashboard extends Seeder
     {
         DB::table('menus')->insert([
             [
-                'is_header' => 0,
                 'title' => 'Dashboard',
                 'href' => 'dashboard',
                 'parent_id' => 0,
@@ -25,7 +24,6 @@ class add_menu_dashboard extends Seeder
                 'slug' => 'dashboard',
             ],
             [
-                'is_header' => 0,
                 'title' => 'Configuration',
                 'href' => '#',
                 'parent_id' => 0,
@@ -34,7 +32,6 @@ class add_menu_dashboard extends Seeder
                 'slug' => 'configuration',
             ],
             [
-                'is_header' => 0,
                 'title' => 'Users',
                 'href' => 'users',
                 'parent_id' => 0,
@@ -44,16 +41,13 @@ class add_menu_dashboard extends Seeder
             ],
 
         ]);
-        $locale = DB::table('menus')
+        $parentid = DB::table('menus')
             ->select('id')
             ->where('title', '=', 'Configuration')
-            ->pluck('id');
-        $quotes = ['[', ']'];
-        $parentid = str_replace($quotes, '', $locale);
+            ->value('id');
 
         DB::table('menus')->insert([
             [
-                'is_header' => 0,
                 'title' => 'Roles',
                 'href' => 'roles',
                 'parent_id' => $parentid,
@@ -62,7 +56,6 @@ class add_menu_dashboard extends Seeder
                 'slug' => 'roles',
             ],
             [
-                'is_header' => 0,
                 'title' => 'Menus',
                 'href' => 'menus',
                 'parent_id' => $parentid,
@@ -71,40 +64,60 @@ class add_menu_dashboard extends Seeder
                 'slug' => 'menus',
             ],
             [
-                'is_header' => 0,
+                'title' => 'Action Master',
+                'href' => 'action_master',
+                'parent_id' => $parentid,
+                'seq' => 3,
+                'icon' => '',
+                'slug' => 'action-master',
+            ],
+            [
                 'title' => 'Lookups',
                 'href' => 'lookups',
                 'parent_id' => $parentid,
-                'seq' => 3,
+                'seq' => 4,
                 'icon' => '',
                 'slug' => 'lookups',
             ],
             [
-                'is_header' => 0,
                 'title' => 'System Parameter',
                 'href' => 'system_parameter',
                 'parent_id' => $parentid,
-                'seq' => 4,
+                'seq' => 5,
                 'icon' => '',
                 'slug' => 'system-parameter',
             ],
             [
-                'is_header' => 0,
                 'title' => 'Countries',
                 'href' => 'countries',
                 'parent_id' => $parentid,
-                'seq' => 5,
+                'seq' => 6,
                 'icon' => '',
                 'slug' => 'countries',
             ],
             [
-                'is_header' => 0,
                 'title' => 'Email Templates',
                 'href' => 'email_template',
                 'parent_id' => $parentid,
-                'seq' => 6,
+                'seq' => 7,
                 'icon' => '',
                 'slug' => 'email-template',
+            ],
+            [
+                'title' => 'Documents',
+                'href' => 'documents',
+                'parent_id' => $parentid,
+                'seq' => 8,
+                'icon' => '',
+                'slug' => 'documents',
+            ],
+            [
+                'title' => 'Institutions',
+                'href' => 'institutions',
+                'parent_id' => $parentid,
+                'seq' => 9,
+                'icon' => '',
+                'slug' => 'institutions',
             ],
         ]);
     }
