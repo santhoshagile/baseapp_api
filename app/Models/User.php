@@ -1,14 +1,15 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
+use Spatie\Sluggable\HasSlug;
+use Spatie\Sluggable\SlugOptions;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, Notifiable;
+    use HasApiTokens, Notifiable, HasSlug;
 
     protected $fillable = [
         'name',
@@ -20,7 +21,7 @@ class User extends Authenticatable
         'salutation',
         'gender',
         'dob',
-        'addressdob',
+        'address',
         'postcode',
         'description',
         'image_url',
@@ -47,14 +48,14 @@ class User extends Authenticatable
 
     public function getFullNameAttribute()
     {
- 
+
         if ($this->name) {
             return $this->name . " " . $this->lastname;
         } else {
             return '';
         }
     }
- 
+
     public function getRoleNameAttribute()
     {
         $roledata = Role::where('id', $this->role_id)->first();
@@ -64,7 +65,7 @@ class User extends Authenticatable
             return '';
         }
     }
-   
+
     public function getSlugOptions(): SlugOptions
     {
         return SlugOptions::create()
