@@ -1,13 +1,17 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\V1\Admin\InstitutionApiController;
 use App\Http\Controllers\Api\V1\Admin\CountriesApiController;
+use App\Http\Controllers\Api\V1\Admin\ChangePasswordApiController;
 use App\Http\Controllers\Api\V1\Admin\FileUploadApiController;
 use App\Http\Controllers\Api\V1\Admin\LookupsApiController;
 use App\Http\Controllers\Api\V1\Admin\MenuApiController;
 use App\Http\Controllers\Api\V1\Admin\RolesApiController;
 use App\Http\Controllers\Api\V1\Admin\SystemParameterApiController;
 use App\Http\Controllers\Api\V1\Admin\UserApiController;
+use App\Http\Controllers\Api\V1\Admin\ActionMasterApiController;
+use App\Http\Controllers\Api\V1\Admin\DocumentApiController;
 use App\Http\Controllers\Api\V1\Auth\RecoverPasswordApiController;
 use App\Http\Controllers\Api\V1\Auth\UserRegistrationApiController;
 use Illuminate\Support\Facades\Route;
@@ -25,16 +29,17 @@ Route::middleware('throttle:5,2')->post('resend_otp_validate', [RecoverPasswordA
 Route::middleware('throttle:5,2')->post('registration_otp_validate', [UserRegistrationApiController::class, 'validateRegistrationOtp']);
 Route::middleware('throttle:5,2')->post('resetpassword', [RecoverPasswordApiController::class, 'validateOtp']);
 Route::middleware('throttle:5,2')->post('login_otp_validate', [RecoverPasswordApiController::class, 'loginOtpValidate']);
-Route::middleware('throttle:5,2')->post('send_login_otp', [RecoverPasswordApiController::class, 'sendLoginOtp']);
+Route::middleware('throttle:5,2')->post('send_login_otp', [AuthController::class, 'sendLoginOtp']);
 
 Route::middleware('auth:api')->group(function () {
     Route::get('profile', [AuthController::class, 'profile']);
     Route::post('logout', [AuthController::class, 'logout']);
 
-// RolesApiController
+    // RolesApiController
     Route::resource('roles', RolesApiController::class);
+    Route::get('/fetchrole', [RolesApiController::class, 'fetchRole']);
 
-//MenuApiController
+    //MenuApiController
     Route::post('menutree', [MenuApiController::class, 'menutree']);
     Route::resource('menu', MenuApiController::class);
     Route::get('rolemenu', [MenuApiController::class, 'rolemenu']);
@@ -42,29 +47,31 @@ Route::middleware('auth:api')->group(function () {
     Route::post('storemenuaccess', [MenuApiController::class, 'storemenuaccess']);
     Route::get('parentmenus', [MenuApiController::class, 'parentMenus']);
 
-// Email Templates
+    // Email Templates
     Route::resource('emailtemplates', 'App\Http\Controllers\Api\V1\Admin\EmailTemplateApiController');
 
-//LookupsApiController
+    //LookupsApiController
     Route::get('lookupdata/{type}', [LookupsApiController::class, 'lookupdata']);
     Route::get('child_lookups_edit', [LookupsApiController::class, 'childLookupEdit']);
     Route::resource('lookups', LookupsApiController::class);
     Route::get('/fetchlookup', [LookupsApiController::class, 'fetchLookup']);
-    Route::get('/fetch_lang_lookup', [LookupsApiController::class, 'fetchLangLookup']);
     Route::post('/update_lookups_status', [LookupsApiController::class, 'updateLookupStatus']);
     Route::post('/fetch_parent_lookup', [LookupsApiController::class, 'fetchParentLookup']);
     Route::post('/save_lookups', [LookupsApiController::class, 'store_lookups']);
     Route::post('/save_child_lookups', [LookupsApiController::class, 'store_child_lookups']);
     Route::post('/delete_lookup/{id}', [LookupsApiController::class, 'destroy']);
 
-//UserApiController
+    //UserApiController
     Route::get('/fetchuser', [UserApiController::class, 'fetchUser']);
     Route::get('/fetchDashboardSuperUser/{user_id}', [UserApiController::class, 'fetchDashboardSuperUser']);
     Route::get('/fetchDashboardMallAdmin/{user_id}', [UserApiController::class, 'fetchDashboardMallAdmin']);
     Route::get('/fetchDashboardStoreAdmin/{user_id}', [UserApiController::class, 'fetchDashboardStoreAdmin']);
     Route::get('fetchuserdatabyslug/{slug}', [UserApiController::class, 'fetchUserDataBySlug']);
+    Route::get('fetchuserbyslug/{slug}', [UserApiController::class, 'fetchUserBySlug']);
+    Route::post('/saveuser', [UserApiController::class, 'saveuser']);
+    Route::post('updateuserstatus', [UserApiController::class, 'updateUserStatus']);
 
-// CountriesApiController
+    // CountriesApiController
     Route::get('/fetch_countries', [CountriesApiController::class, 'index']);
     Route::post('/save_countries', [CountriesApiController::class, 'saveCountries']);
     Route::get('/edit_countries/{slug}', [CountriesApiController::class, 'getCountriesBySlug']);
@@ -81,6 +88,7 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/save_cities', [CountriesApiController::class, 'saveCities']);
     Route::get('/edit_cities/{slug}', [CountriesApiController::class, 'getCitiesBySlug']);
     Route::post('/delete_cities/{id}', [CountriesApiController::class, 'deleteCities']);
+    Route::post('/update_country_status', [CountriesApiController::class, 'updateCountryStatus']);
 
     // System Parameters
     Route::get('/getsystem_params', [SystemParameterApiController::class, 'index']);
@@ -89,11 +97,29 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/delete_system_params/{id}', [SystemParameterApiController::class, 'deleteSystemParameter']);
     Route::get('/fetch_system_params', [SystemParameterApiController::class, 'fetchsystemparameter']);
     Route::post('/update_system_param_status', [SystemParameterApiController::class, 'updateSystemParamStatus']);
-    Route::get('/fetch-products-tags-status', [SystemParameterApiController::class, 'fetchProductsTagsStatus']);
+    Route::get('/fetch_products_tags_status', [SystemParameterApiController::class, 'fetchProductsTagsStatus']);
+
+    // Action Master
+    Route::resource('/action_master', ActionMasterApiController::class);
+    Route::post('/update_action_master_status', [ActionMasterApiController::class, 'updateActionMasterStatus']);
+    Route::get('/fetchroleactions/{role_id}', [ActionMasterApiController::class, 'fetchRoleActions']);
+    Route::post('/storeactionaccess', [ActionMasterApiController::class, 'storeRoleAction']);
+    Route::get('/check_action_permission', [ActionMasterApiController::class, 'checkActionPermission']);
+
 
     //File Upload Method
     Route::post('/imageupload', [FileUploadApiController::class, 'imageUpload']);
     Route::post('/file_upload', [FileUploadApiController::class, 'fileUpload']);
     Route::post('/imageUrlBase64', [FileUploadApiController::class, 'imageUrlBase64']);
 
+    // Institution Api Controller
+    Route::resource('institution', InstitutionApiController::class);
+    
+    // Document Controller
+    Route::get('/fetch_documents', [DocumentApiController::class, 'index']);
+    Route::get('/documents/{slug}', [DocumentApiController::class, 'editDocument']);
+    Route::post('/create_document', [DocumentApiController::class, 'store']);
+    Route::patch('/documents/{id}', [DocumentApiController::class, 'update']);
+    Route::post('/upload_file', [DocumentApiController::class, 'uploadFile']);
+    Route::delete('/documents/{id}', [DocumentApiController::class, 'delete']);
 });

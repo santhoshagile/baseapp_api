@@ -76,7 +76,7 @@ class CountriesApiController extends Controller
      *
      * @created-on: 05-02-2026
      *
-     * @updated-on: 05-02-2026
+     * @updated-on: 10-02-2026
      */
     public function saveCountries(Request $request)
     {
@@ -84,6 +84,8 @@ class CountriesApiController extends Controller
         $id = $request->id;
         $validator = Validator::make($request->all(), [
             'name' => 'required',
+            'mobile_code' => 'required',
+            'country_code' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -95,12 +97,16 @@ class CountriesApiController extends Controller
                 $countries = Countries::where('id', $id)
                     ->update([
                         'name' => $request->name,
+                        'mobile_code' => $request->mobile_code,
+                        'country_code' => $request->country_code,
                         'updated_at' => $currenttime,
                     ]);
                 return response()->json(['status' => 'S', 'message' => trans('returnmessage.updatedsuccessfully'), 'countries' => $countries]);
             } else {
                 $countries = Countries::create([
                     'name' => $request->name,
+                    'mobile_code' => $request->mobile_code,
+                    'country_code' => $request->country_code,
                     'updated_at' => $currenttime,
                     'created_at' => $currenttime,
                 ]);
@@ -249,12 +255,10 @@ class CountriesApiController extends Controller
      *
      * @updated-on: 05-02-2026
      */
-    public function fetchStatesName(Request $request)
+    public function fetchStatesName($id)
     {
         try {
-            $country_id = Countries::where('name', $request->name)->first();
-            $cid = $country_id->id;
-            $name = States::where('country_id', $cid)->get();
+            $name = States::where('country_id', $id)->get();
             return response()->json(['status' => 'S', 'message' => trans('returnmessage.dataretreived'), 'states' => $name]);
         } catch (\Exception $e) {
             return response()->json(['status' => 'E', 'message' => trans('returnmessage.error_processing'), 'error_data' => $e->getmessage()]);
@@ -270,13 +274,10 @@ class CountriesApiController extends Controller
      *
      * @updated-on: 05-02-2026
      */
-    public function fetchCitiesName(Request $request)
+    public function fetchCitiesName($id)
     {
         try {
-
-            $state_id = States::where('name', $request->name)->first();
-            $sid = $state_id->id;
-            $name = Cities::where('state_id', $sid)->get();
+            $name = Cities::where('state_id', $id)->get();
             return response()->json(['status' => 'S', 'message' => trans('returnmessage.dataretreived'), 'cities' => $name]);
         } catch (\Exception $e) {
             return response()->json(['status' => 'E', 'message' => trans('returnmessage.error_processing'), 'error_data' => $e->getmessage()]);
@@ -417,6 +418,29 @@ class CountriesApiController extends Controller
         try {
             $cities = Cities::where('id', $id)->delete();
             return response()->json(['status' => 'S', 'message' => trans('returnmessage.deletedsuccessfully')]);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'E', 'message' => trans('returnmessage.error_processing'), 'error_data' => $e->getmessage()]);
+        }
+    }
+    /**
+     * @function: to update System Parameters 'is whitelisted' status.
+     *
+     * @author: Santhosha G
+     *
+     * @created-on: 10 Feb, 2026
+     *
+     * @updated-on: N/A
+     */
+    public function updateCountryStatus(request $request)
+    {
+        try {
+            $Countries = Countries::where('id', $request->id)->first();
+            if ($Countries->is_whitelisted == 1) {
+                $status = Countries::where('id', $request->id)->update(['is_whitelisted' => 0]);
+            } else {
+                $status = Countries::where('id', $request->id)->update(['is_whitelisted' => 1]);
+            }
+            return response()->json(['status' => 'S', 'message' => trans('returnmessage.saved_success')]);
         } catch (\Exception $e) {
             return response()->json(['status' => 'E', 'message' => trans('returnmessage.error_processing'), 'error_data' => $e->getmessage()]);
         }

@@ -14,4 +14,6 @@ return [
     'Institutions' => 'Institutions',
     'States' => 'States',
     'Cities' => 'Cities',
+    'Action Master' => 'Action Master',
+    'Documents' => 'Documents',
 ];

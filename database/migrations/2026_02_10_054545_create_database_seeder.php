@@ -11,8 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->string('token_id', 1000)->after('password')->nullable()->comment('token id of user');
+        Schema::create('database_seeder', function (Blueprint $table) {
+            $table->bigIncrements('id')->comment('primary key');
+            $table->string('seeder', 250)->nullable()->comment('Seeder Class');
+            $table->integer('status')->default(1)->comment('Seeder Status');
         });
     }
 
@@ -21,8 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('token_id');
-        });
+        Schema::dropIfExists('database_seeder');
     }
 };

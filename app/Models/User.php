@@ -1,23 +1,30 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
+use Spatie\Sluggable\HasSlug;
+use Spatie\Sluggable\SlugOptions;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, Notifiable;
+    use HasApiTokens, Notifiable, HasSlug;
 
     protected $fillable = [
         'name',
+        'lastname',
         'email',
         'password',
         'token_id',
         'role_id',
         'salutation',
         'gender',
+        'dob',
+        'address',
+        'postcode',
+        'description',
+        'image_url',
         'country',
         'state',
         'city',
@@ -41,14 +48,14 @@ class User extends Authenticatable
 
     public function getFullNameAttribute()
     {
- 
+
         if ($this->name) {
             return $this->name . " " . $this->lastname;
         } else {
             return '';
         }
     }
- 
+
     public function getRoleNameAttribute()
     {
         $roledata = Role::where('id', $this->role_id)->first();
@@ -58,16 +65,27 @@ class User extends Authenticatable
             return '';
         }
     }
-   
+
     public function getSlugOptions(): SlugOptions
     {
         return SlugOptions::create()
             ->generateSlugsFrom('name')
             ->saveSlugsTo('slug');
     }
-
     public function role()
     {
         return $this->belongsTo('App\Models\Role', 'role_id', 'id');
+    }
+    public function country()
+    {
+        return $this->belongsTo('App\Models\Countries', 'country', 'id');
+    }
+    public function state()
+    {
+        return $this->belongsTo('App\Models\States', 'state', 'id');
+    }
+    public function city()
+    {
+        return $this->belongsTo('App\Models\Cities', 'city', 'id');
     }
 }

@@ -7,11 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
 
-class Countries extends Model
+class Institutions extends Model
 {
     use HasFactory, HasSlug;
 
-    public $table = 'countries';
+    public $table = 'institutions';
 
     protected $dates = [
         'created_at',
@@ -20,21 +20,13 @@ class Countries extends Model
 
     protected $fillable = [
         'name'
-        , 'mobile_code'
-        , 'country_code'
-        , 'is_whitelisted'
-        , 'header_id'
-        , 'lang'
+        , 'type'
+        , 'address'
         , 'status'
         , 'slug'
         , 'created_by'
         , 'updated_by',
     ];
-
-    public function states()
-    {
-        return $this->hasMany('App\Models\States', 'country_id', 'id');
-    }
 
     public function getSlugOptions(): SlugOptions
     {

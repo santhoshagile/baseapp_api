@@ -11,15 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('menus', function (Blueprint $table) {
+        Schema::create('institutions', function (Blueprint $table) {
             $table->bigIncrements('id')->comment('primary key');
-            $table->string('title')->comment('Name of the Menu Title');
-            $table->string('icon')->comment('Icon or Image for a Menu')->nullable();
-            $table->string('href')->comment('Menu Link to navigate');
-            $table->integer('parent_id')->comment('ID of the Parent Menu');
-            $table->integer('seq')->comment('Sequence of the menu for Sorting');
+            $table->string('name', 255)->nullable()->comment('Name of the institution');
+            $table->string('type', 255)->nullable()->comment('Type of the institution');
+            $table->text('address', 255)->nullable()->comment('Address of the institution');
             $table->integer('status')->default(1)->comment('Status if the record is active');
-            $table->string('slug', 1000)->nullable()->comment('Uniquely generated slug for system email template');
+            $table->string('slug', 1000)->nullable()->comment('Uniquely generated slug for system states');
             $table->integer('created_by')->nullable()->comment('Who created the record');
             $table->integer('updated_by')->nullable()->comment('Who last updated the record');
             $table->timestamps();
@@ -31,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('menus');
+        Schema::dropIfExists('institutions');
     }
 };

@@ -11,17 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('roles', function (Blueprint $table) {
+        Schema::create('action_master', function (Blueprint $table) {
             $table->bigIncrements('id')->comment('primary key');
-            $table->string('rolename', 100)->unique()->comment('Unique Name for a Role');
-            $table->string('role_display_name', 100)->comment('Display name for role');
-            $table->string('roledescription', 500)->comment('Description of a Role');
-            $table->integer('status')->default(1)->comment('Status if the record is active');
-            $table->string('slug', 1000)->nullable()->comment('Uniquely generated slug for roles');
+            $table->string('action_name', 250)->comment('Action Name');
+            $table->string('category', 250)->nullable()->comment('Action Category');
+            $table->string('description', 500)->nullable()->comment('Description');
+            $table->integer('status')->default(1)->comment('Seeder Status');
+            $table->string('slug', 250)->nullable()->comment('Uniquely generated slug for actions');
             $table->integer('created_by')->nullable()->comment('Who created the record');
             $table->integer('updated_by')->nullable()->comment('Who last updated the record');
             $table->timestamps();
         });
+
     }
 
     /**
@@ -29,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('role');
+        Schema::dropIfExists('action_master');
     }
 };
